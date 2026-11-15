@@ -69,6 +69,21 @@ services:
     networks:
       - audiobook-network
 
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: audiobook-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /mnt/drive2/covers:/var/www/covers:ro
+    depends_on:
+      - audiobook-api
+    restart: unless-stopped
+    networks:
+      - audiobook-network
+
   # Certbot for SSL (can be removed for HTTP-only)
   certbot:
     image: certbot/certbot:latest
