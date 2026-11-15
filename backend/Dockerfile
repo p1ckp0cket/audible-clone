@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     libsndfile1 \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Piper TTS from GitHub releases
@@ -29,15 +30,22 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create data directories
 RUN mkdir -p /data /mnt/drive2/audiobooks /mnt/drive2/ebooks /mnt/drive2/covers /mnt/drive2/tts_output \
     && chown -R appuser:appuser /app /data /mnt/drive2
 
 # Switch to app user
-USER appuser
+# USER appuser  -- removed, entrypoint handles user switching
 
 # Expose port
 EXPOSE 8000
+
+# Entry point
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
