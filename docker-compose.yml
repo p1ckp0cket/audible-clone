@@ -11,7 +11,7 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=false
-      - DATABASE_URL=sqlite+aiosqlite:///data/library.db
+      - DATABASE_URL=sqlite+aiosqlite:////data/library.db
       - AUDIOBOOKS_PATH=/mnt/drive2/audiobooks
       - EBOOKS_UPLOAD_PATH=/mnt/drive2/ebooks
       - COVERS_PATH=/mnt/drive2/covers
