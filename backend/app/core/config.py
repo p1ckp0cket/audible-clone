@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
     
     # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./data/library.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:////data/library.db"
     
     # File paths
     AUDIOBOOKS_PATH: str = "/mnt/drive2/audiobooks"
