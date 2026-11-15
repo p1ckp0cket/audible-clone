@@ -13,16 +13,32 @@ mkdir -p /data
 touch /data/library.db
 chown appuser:appuser /data/library.db
 
-# Verify we can write to the database
-echo "=== Entrypoint: Testing database write ==="
+# Verify we can write to the database with basic sqlite3
+echo "=== Entrypoint: Testing database write (sqlite3) ==="
 gosu appuser python3 -c "
 import sqlite3
 conn = sqlite3.connect('/data/library.db')
 conn.execute('CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY)')
-conn.execute('INSERT INTO test (id) VALUES (1)')
+conn.execute('INSERT OR IGNORE INTO test (id) VALUES (1)')
 conn.commit()
 conn.close()
-print('Database write test: OK')
+print('sqlite3 write test: OK')
+" 2>&1
+
+# Verify we can write to the database with aiosqlite (what the app uses)
+echo "=== Entrypoint: Testing database write (aiosqlite) ==="
+gosu appuser python3 -c "
+import asyncio
+import aiosqlite
+
+async def test():
+    async with aiosqlite.connect('/data/library.db') as db:
+        await db.execute('CREATE TABLE IF NOT EXISTS test_async (id INTEGER PRIMARY KEY)')
+        await db.execute('INSERT OR IGNORE INTO test_async (id) VALUES (1)')
+        await db.commit()
+    print('aiosqlite write test: OK')
+
+asyncio.run(test())
 " 2>&1
 
 echo "=== Entrypoint: Starting application ==="
