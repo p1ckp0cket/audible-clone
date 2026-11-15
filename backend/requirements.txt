@@ -24,8 +24,7 @@ python-magic==0.4.27
 asyncpg==0.29.0
 aiosqlite==0.20.0
 
-# TTS Dependencies
-piper-tts==1.2.0
+# TTS Dependencies (piper-tts installed via apt in Dockerfile)
 kokoro-onnx==0.3.1
 soundfile==0.12.1
 onnxruntime==1.18.0
