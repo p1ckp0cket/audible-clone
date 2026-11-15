@@ -7,8 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     libsndfile1 \
-    piper-tts \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Piper TTS from GitHub releases
+RUN mkdir -p /opt/piper/models && \
+    curl -L -o /tmp/piper.tar.gz https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz && \
+    tar -xzf /tmp/piper.tar.gz -C /opt/piper && \
+    rm /tmp/piper.tar.gz && \
+    chmod +x /opt/piper/piper
 
 # Create app user
 RUN useradd -m -u 1000 appuser
