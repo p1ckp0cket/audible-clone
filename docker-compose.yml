@@ -28,7 +28,7 @@ services:
       - PIPER_MODEL_DIR=/home/paperclip/piper/models
       - KOKORO_MODEL_PATH=/home/paperclip/kokoro/kokoro-v1.0.onnx
     volumes:
-      - ./backend/data:/data
+      - audiobook-data:/data
       - /mnt/drive2/audiobooks:/mnt/drive2/audiobooks
       - /mnt/drive2/ebooks:/mnt/drive2/ebooks
       - /mnt/drive2/covers:/mnt/drive2/covers
@@ -112,3 +112,7 @@ services:
 networks:
   audiobook-network:
     driver: bridge
+
+volumes:
+  audiobook-data:
+    driver: local
