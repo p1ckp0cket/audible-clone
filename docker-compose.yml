@@ -11,7 +11,7 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=false
-      - DATABASE_URL=sqlite+aiosqlite:///./data/library.db
+      - DATABASE_URL=sqlite+aiosqlite:///data/library.db
       - AUDIOBOOKS_PATH=/mnt/drive2/audiobooks
       - EBOOKS_UPLOAD_PATH=/mnt/drive2/ebooks
       - COVERS_PATH=/mnt/drive2/covers
@@ -28,7 +28,7 @@ services:
       - PIPER_MODEL_DIR=/home/paperclip/piper/models
       - KOKORO_MODEL_PATH=/home/paperclip/kokoro/kokoro-v1.0.onnx
     volumes:
-      - ./backend/data:/app/data
+      - ./backend/data:/data
       - /mnt/drive2/audiobooks:/mnt/drive2/audiobooks
       - /mnt/drive2/ebooks:/mnt/drive2/ebooks
       - /mnt/drive2/covers:/mnt/drive2/covers
