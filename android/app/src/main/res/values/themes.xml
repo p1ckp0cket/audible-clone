@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme -->
+    <style name="Theme.AudibleClone" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/md_sys_color_primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/md_sys_color_on_primary</item>
+        
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/md_sys_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/primary_light</item>
+        <item name="colorOnSecondary">@color/md_sys_color_on_secondary</item>
+        
+        <!-- Tertiary colors -->
+        <item name="colorTertiary">@color/md_sys_color_tertiary</item>
+        <item name="colorOnTertiary">@color/md_sys_color_on_tertiary</item>
+        
+        <!-- Background -->
+        <item name="android:colorBackground">@color/md_sys_color_background</item>
+        <item name="colorSurface">@color/md_sys_color_surface</item>
+        <item name="colorOnSurface">@color/md_sys_color_on_surface</item>
+        
+        <!-- Error -->
+        <item name="colorError">@color/md_sys_color_error</item>
+        <item name="colorOnError">@color/md_sys_color_on_error</item>
+        
+        <!-- Custom attributes -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/primary_dark</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+    
+    <!-- Dark theme variant -->
+    <style name="Theme.AudibleClone.Dark" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/md_sys_color_primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/md_sys_color_on_primary</item>
+        
+        <item name="colorSecondary">@color/md_sys_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/primary_light</item>
+        <item name="colorOnSecondary">@color/md_sys_color_on_secondary</item>
+        
+        <item name="colorTertiary">@color/md_sys_color_tertiary</item>
+        <item name="colorOnTertiary">@color/md_sys_color_on_tertiary</item>
+        
+        <item name="android:colorBackground">@color/primary_dark</item>
+        <item name="colorSurface">@color/md_sys_color_inverse_surface</item>
+        <item name="colorOnSurface">@color/md_sys_color_inverse_on_surface</item>
+        
+        <item name="colorError">@color/md_sys_color_error</item>
+        <item name="colorOnError">@color/md_sys_color_on_error</item>
+        
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/primary_dark</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+    
+    <!-- Player fullscreen theme -->
+    <style name="Theme.AudibleClone.Player" parent="Theme.AudibleClone.Dark">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    
+    <!-- Splash theme -->
+    <style name="Theme.AudibleClone.Splash" parent="Theme.AudibleClone">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Background -->
+    <path
+        android:fillColor="#2E4A47"
+        android:pathData="M0,0h200v300h-200z" />
+    
+    <!-- Book spine -->
+    <path
+        android:fillColor="#1B5E7A"
+        android:pathData="M60,40h80v220h-80z" />
+    
+    <!-- Book cover decoration -->
+    <path
+        android:fillColor="#5A9BB5"
+        android:pathData="M70,50h60v80h-60z" />
+    
+    <!-- Lines on spine -->
+    <path
+        android:fillColor="#1A2B2C"
+        android:pathData="M80,100h40v2h-40z" />
+    <path
+        android:fillColor="#1A2B2C"
+        android:pathData="M80,120h40v2h-40z" />
+    <path
+        android:fillColor="#1A2B2C"
+        android:pathData="M80,140h40v2h-40z" />
+    <path
+        android:fillColor="#1A2B2C"
+        android:pathData="M80,160h40v2h-40z" />
+    
+    <!-- Title text area -->
+    <rect
+        android:fillColor="#CDE6F0"
+        android:x="70"
+        android:y="180"
+        android:width="60"
+        android:height="8" />
+    <rect
+        android:fillColor="#CDE6F0"
+        android:x="70"
+        android:y="195"
+        android:width="45"
+        android:height="6" />
+</vector>
