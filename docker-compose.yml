@@ -36,13 +36,14 @@ services:
       - /home/paperclip/piper/models:/home/paperclip/piper/models
       - /home/paperclip/kokoro:/home/paperclip/kokoro
     depends_on:
-      - qbittorrent
+      qbittorrent:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5s
     restart: unless-stopped
     networks:
       - audiobook-network
@@ -69,7 +70,7 @@ services:
     networks:
       - audiobook-network
 
-  # Nginx reverse proxy
+  # Nginx reverse proxy - use host networking to access localhost:8000
   nginx:
     image: nginx:alpine
     container_name: audiobook-nginx
@@ -78,11 +79,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - /mnt/drive2/covers:/var/www/covers:ro
-    depends_on:
-      - audiobook-api
+    network_mode: "host"
     restart: unless-stopped
-    networks:
-      - audiobook-network
 
   # Certbot for SSL (can be removed for HTTP-only)
   certbot:
