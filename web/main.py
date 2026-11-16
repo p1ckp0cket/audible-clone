@@ -757,12 +757,8 @@ async def get_chapters(book_id: int):
 
 @app.get("/api/librivox/search")
 async def search_librivox(q: str = "", page: int = 1, limit: int = 20):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://librivox.org/api/feed/audiobooks",
-            params={"format": "json", "title": q, "limit": limit, "offset": (page-1)*limit}
-        )
-        return JSONResponse(content=response.json())
+    data = await fetch_from_api(f"/api/v1/librivox/search?q={q}&page={page}&limit={limit}")
+    return JSONResponse(content=data)
 
 @app.get("/api/abb/search")
 async def search_abb(q: str = "", page: int = 1, limit: int = 20):

@@ -30,7 +30,7 @@ class LibriVoxService:
         """Search LibriVox for audiobooks."""
         try:
             params = {
-                'title': query,
+                'q': query,
                 'limit': min(limit, 500),
                 'offset': offset,
                 'format': 'json',

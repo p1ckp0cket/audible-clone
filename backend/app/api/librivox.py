@@ -23,7 +23,7 @@ async def search_librivox(
     service = LibriVoxService(db)
     try:
         offset = (page - 1) * per_page
-        result = await service.search(q, limit=per_page, offset=offset, genre=genre)
+        result = await service.search(query=q, limit=per_page, offset=offset, genre=genre)
         return result
     finally:
         await service.close()
