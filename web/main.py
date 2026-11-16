@@ -19,10 +19,6 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import sqlite3
-from contextlib import asynccontextmanager
-
-# Create Jinja2 environment with completely disabled cache
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # Color constants for templates
 DARK_CHARCOAL = "#1A2523"
@@ -50,6 +46,30 @@ COVERS_PATH = "/mnt/drive2/covers"
 EBOOKS_PATH = "/mnt/drive2/ebooks"
 TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
 DB_PATH = "/data/audible_web.db"
+
+# FastAPI app
+app = FastAPI(title="Audible Clone", version="1.0.0")
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Config
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+AUDIOBOOKS_PATH = "/mnt/drive2/audiobooks"
+COVERS_PATH = "/mnt/drive2/covers"
+EBOOKS_PATH = "/mnt/drive2/ebooks"
+TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
+DB_PATH = "/data/audible_web.db"
+
+# Static files
+app.mount("/covers", StaticFiles(directory=COVERS_PATH), name="covers")
+app.mount("/audio", StaticFiles(directory=AUDIOBOOKS_PATH), name="audio")
 
 # Create Jinja2 environment with completely disabled cache
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -253,6 +273,312 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             book_id INTEGER NOT NULL,
             chapter_index INTEGER NOT NULL,
+            title TEXT,
+            start_offset_seconds INTEGER DEFAULT 0,
+            end_offset_seconds INTEGER,
+            duration_seconds INTEGER,
+            file_path TEXT,
+            FOREIGN KEY (book_id) REFERENCES books (id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS highlights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER NOT NULL,
+            chapter_id INTEGER,
+            text TEXT NOT NULL,
+            note TEXT,
+            color TEXT DEFAULT '#FFD700',
+            location_type TEXT,
+            location_value REAL,
+            location_end REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (book_id) REFERENCES books (id),
+            FOREIGN KEY (chapter_id) REFERENCES chapters (id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tts_tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ebook_id INTEGER,
+            voice TEXT,
+            status TEXT DEFAULT 'pending',
+            progress INTEGER DEFAULT 0,
+            output_path TEXT,
+            error TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS librivox_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            query TEXT,
+            data TEXT,
+            cached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Color constants for templates
+DARK_CHARCOAL = "#1A2523"
+FOREST_GREEN = "#2E4A43"
+DEEP_TEAL = "#155D7A"
+STEEL_BLUE = "#5B9BB5"
+ICY_BLUE = "#CDE6F0"
+BG_PRIMARY = "#1A1A2E"
+BG_SECONDARY = "#16213E"
+BG_CARD = "#1F2A44"
+ACCENT = "#5B9BB5"
+ACCENT_HOVER = "#4A8AA3"
+TEXT_PRIMARY = "#FFFFFF"
+TEXT_SECONDARY = "#A0B8D0"
+TEXT_MUTED = "#6B8BA4"
+BORDER = "#2A3A5E"
+SUCCESS = "#2E4A43"
+WARNING = "#D4A537"
+ERROR = "#C0392B"
+
+# Common context for templates
+COMMON_CONTEXT = {
+    "DARK_CHARCOAL": "#1A2523",
+    "FOREST_GREEN": "#2E4A43",
+    "DEEP_TEAL": "#155D7A",
+    "STEEL_BLUE": "#5B9BB5",
+    "ICY_BLUE": "#CDE6F0",
+    "BG_PRIMARY": "#1A1A2E",
+    "BG_SECONDARY": "#16213E",
+    "BG_CARD": "#1F2A44",
+    "ACCENT": "#5B9BB5",
+    "ACCENT_HOVER": "#4A8AA3",
+    "TEXT_PRIMARY": "#FFFFFF",
+    "TEXT_SECONDARY": "#A0B8D0",
+    "TEXT_MUTED": "#6B8BA4",
+    "BORDER": "#2A3A5E",
+    "SUCCESS": "#2E4A43",
+    "WARNING": "#D4A537",
+    "ERROR": "#C0392B",
+}
+
+def render_template(template_name: str, extra_context: dict = None) -> HTMLResponse:
+    """Render template manually to bypass Starlette's TemplateResponse cache issues."""
+    context = COMMON_CONTEXT.copy()
+    if extra_context:
+        context.update(extra_context)
+    template = jinja_env.get_template(template_name)
+    html = template.render(context)
+    return HTMLResponse(content=html)
+
+# Initialize database
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS books (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            asin TEXT UNIQUE,
+            title TEXT NOT NULL,
+            author TEXT,
+            narrator TEXT,
+            series TEXT,
+            series_number INTEGER,
+            description TEXT,
+            genres TEXT,
+            tags TEXT,
+            published_year INTEGER,
+            publisher TEXT,
+            isbn TEXT,
+            language TEXT DEFAULT 'en',
+            duration_seconds INTEGER,
+            cover_url TEXT,
+            cover_path TEXT,
+            source TEXT DEFAULT 'local',
+            source_id TEXT,
+            status TEXT DEFAULT 'available',
+            file_path TEXT,
+            file_size INTEGER,
+            file_format TEXT,
+            bitrate INTEGER,
+            sample_rate INTEGER,
+            chapters_count INTEGER DEFAULT 0,
+            rating REAL,
+            user_rating REAL,
+            progress_seconds INTEGER DEFAULT 0,
+            completed BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_played_at TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chapters (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER NOT NULL,
+            chapter_index INTEGER NOT NULL,
+            title TEXT,
+            start_offset_seconds INTEGER DEFAULT 0,
+            end_offset_seconds INTEGER,
+            duration_seconds INTEGER,
+            file_path TEXT,
+            FOREIGN KEY (book_id) REFERENCES books (id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS highlights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER NOT NULL,
+            chapter_id INTEGER,
+            text TEXT NOT NULL,
+            note TEXT,
+            color TEXT DEFAULT '#FFD700',
+            location_type TEXT,
+            location_value REAL,
+            location_end REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (book_id) REFERENCES books (id),
+            FOREIGN KEY (chapter_id) REFERENCES chapters (id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tts_tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ebook_id INTEGER,
+            voice TEXT,
+            status TEXT DEFAULT 'pending',
+            progress INTEGER DEFAULT 0,
+            output_path TEXT,
+            error TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS librivox_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            query TEXT,
+            data TEXT,
+            cached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Color constants for templates
+DARK_CHARCOAL = "#1A2523"
+FOREST_GREEN = "#2E4A43"
+DEEP_TEAL = "#155D7A"
+STEEL_BLUE = "#5B9BB5"
+ICY_BLUE = "#CDE6F0"
+BG_PRIMARY = "#1A1A2E"
+BG_SECONDARY = "#16213E"
+BG_CARD = "#1F2A44"
+ACCENT = "#5B9BB5"
+ACCENT_HOVER = "#4A8AA3"
+TEXT_PRIMARY = "#FFFFFF"
+TEXT_SECONDARY = "#A0B8D0"
+TEXT_MUTED = "#6B8BA4"
+BORDER = "#2A3A5E"
+SUCCESS = "#2E4A43"
+WARNING = "#D4A537"
+ERROR = "#C0392B"
+
+# Common context for templates
+COMMON_CONTEXT = {
+    "DARK_CHARCOAL": "#1A2523",
+    "FOREST_GREEN": "#2E4A43",
+    "DEEP_TEAL": "#155D7A",
+    "STEEL_BLUE": "#5B9BB5",
+    "ICY_BLUE": "#CDE6F0",
+    "BG_PRIMARY": "#1A1A2E",
+    "BG_SECONDARY": "#16213E",
+    "BG_CARD": "#1F2A44",
+    "ACCENT": "#5B9BB5",
+    "ACCENT_HOVER": "#4A8AA3",
+    "TEXT_PRIMARY": "#FFFFFF",
+    "TEXT_SECONDARY": "#A0B8D0",
+    "TEXT_MUTED": "#6B8BA4",
+    "BORDER": "#2A3A5E",
+    "SUCCESS": "#2E4A43",
+    "WARNING": "#D4A537",
+    "ERROR": "#C0392B",
+}
+
+def render_template(template_name: str, extra_context: dict = None) -> HTMLResponse:
+    """Render template manually to bypass Starlette's TemplateResponse cache issues."""
+    context = COMMON_CONTEXT.copy()
+    if extra_context:
+        context.update(extra_context)
+    template = jinja_env.get_template(template_name)
+    html = template.render(context)
+    return HTMLResponse(content=html)
+
+# Initialize database
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS books (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            asin TEXT UNIQUE,
+            title TEXT NOT NULL,
+            author TEXT,
+            narrator TEXT,
+            series TEXT,
+            series_number INTEGER,
+            description TEXT,
+            genres TEXT,
+            tags TEXT,
+            published_year INTEGER,
+            publisher TEXT,
+            isbn TEXT,
+            language TEXT DEFAULT 'en',
+            duration_seconds INTEGER,
+            cover_url TEXT,
+            cover_path TEXT,
+            source TEXT DEFAULT 'local',
+            source_id TEXT,
+            status TEXT DEFAULT 'available',
+            file_path TEXT,
+            file_size INTEGER,
+            file_format TEXT,
+            bitrate INTEGER,
+            sample_rate INTEGER,
+            chapters_count INTEGER DEFAULT 0,
+            rating REAL,
+            user_rating REAL,
+            progress_seconds INTEGER DEFAULT 0,
+            completed BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_played_at TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chapters (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER NOT NULL,
+            chapter_index INTEGER NOT_NULL,
             title TEXT,
             start_offset_seconds INTEGER DEFAULT 0,
             end_offset_seconds INTEGER,
