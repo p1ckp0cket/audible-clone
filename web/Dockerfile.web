@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements-web.txt
 WORKDIR /app
 
 # Copy application
-COPY web/main.py .
+COPY main.py .
 
 # Create templates directory
 RUN mkdir -p templates
