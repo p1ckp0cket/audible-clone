@@ -48,6 +48,23 @@ services:
     networks:
       - audiobook-network
 
+  # Web Interface
+  audiobook-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.web
+    container_name: audiobook-web
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://audiobook-api:8000
+    depends_on:
+      audiobook-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - audiobook-network
+
   # qBittorrent for AudioBookBay downloads
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
