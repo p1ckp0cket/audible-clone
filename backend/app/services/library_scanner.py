@@ -53,6 +53,8 @@ class LibraryScanner:
             except Exception as e:
                 stats["errors"] += 1
                 print(f"Error processing {book_dir}: {e}")
+                # Rollback the session to recover from the error
+                await self.db.rollback()
         
         await self.db.commit()
         return stats
