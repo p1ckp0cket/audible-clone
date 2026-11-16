@@ -166,7 +166,7 @@ init_db()
 # Templates - disable cache to avoid issues with template caching
 templates_dir = Path(__file__).parent / "templates"
 templates_dir.mkdir(exist_ok=True)
-templates = Jinja2Templates(directory=str(templates_dir), auto_reload=True)
+templates = Jinja2Templates(directory=str(templates_dir))
 
 # Disable template cache
 templates.env.cache = {}
