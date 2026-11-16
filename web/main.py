@@ -40,30 +40,47 @@ EBOOKS_PATH = "/mnt/drive2/ebooks"
 TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
 DB_PATH = "/data/audible_web.db"
 
-# Color palette from pallet.jpg
-COLORS = {
-    "dark_charcoal": "#1A2523",
-    "forest_green": "#2E4A43",
-    "deep_teal": "#155D7A",
-    "steel_blue": "#5B9BB5",
-    "icy_blue": "#CDE6F0",
-    "bg_primary": "#1A1A2E",
-    "bg_secondary": "#16213E",
-    "bg_card": "#1F2A44",
-    "accent": "#5B9BB5",
-    "accent_hover": "#4A8AA3",
-    "text_primary": "#FFFFFF",
-    "text_secondary": "#A0B8D0",
-    "text_muted": "#6B8BA4",
-    "border": "#2A3A5E",
-    "success": "#2E4A43",
-    "warning": "#D4A537",
-    "error": "#C0392B",
-}
+# Color palette from pallet.jpg - make it hashable for Jinja2 cache
+class Colors:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+    
+    def __hash__(self):
+        return hash(tuple(sorted(self.__dict__.items())))
+    
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+    
+    def __getitem__(self, key):
+        return getattr(self, key)
+    
+    def __contains__(self, key):
+        return hasattr(self, key)
+    
+    def get(self, key, default=None):
+        return getattr(self, key, default)
 
-# Create directories
-for path in [AUDIOBOOKS_PATH, COVERS_PATH, EBOOKS_PATH, TTS_OUTPUT_PATH]:
-    Path(path).mkdir(parents=True, exist_ok=True)
+# Color palette from pallet.jpg - make it hashable for Jinja2 cache
+COLORS = Colors(
+    dark_charcoal="#1A2523",
+    forest_green="#2E4A43",
+    deep_teal="#155D7A",
+    steel_blue="#5B9BB5",
+    icy_blue="#CDE6F0",
+    bg_primary="#1A1A2E",
+    bg_secondary="#16213E",
+    bg_card="#1F2A44",
+    accent="#5B9BB5",
+    accent_hover="#4A8AA3",
+    text_primary="#FFFFFF",
+    text_secondary="#A0B8D0",
+    text_muted="#6B8BA4",
+    border="#2A3A5E",
+    success="#2E4A43",
+    warning="#D4A537",
+    error="#C0392B",
+)
 
 # Initialize database
 def init_db():
