@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import sqlite3
-from collections import namedtuple
+from dataclasses import dataclass
 from contextlib import asynccontextmanager
 
 app = FastAPI(title="Audible Clone", version="1.0.0")
@@ -41,33 +41,30 @@ EBOOKS_PATH = "/mnt/drive2/ebooks"
 TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
 DB_PATH = "/data/audible_web.db"
 
-# Color palette from pallet.jpg - use namedtuple for hashability
-Colors = namedtuple('Colors', [
-    'dark_charcoal', 'forest_green', 'deep_teal', 'steel_blue', 'icy_blue',
-    'bg_primary', 'bg_secondary', 'bg_card', 'accent', 'accent_hover',
-    'text_primary', 'text_secondary', 'text_muted', 'border', 'success',
-    'warning', 'error',
-])
+# Color palette from pallet.jpg - use frozen dataclass for hashability
+from dataclasses import dataclass
 
-COLORS = Colors(
-    dark_charcoal="#1A2523",
-    forest_green="#2E4A43",
-    deep_teal="#155D7A",
-    steel_blue="#5B9BB5",
-    icy_blue="#CDE6F0",
-    bg_primary="#1A1A2E",
-    bg_secondary="#16213E",
-    bg_card="#1F2A44",
-    accent="#5B9BB5",
-    accent_hover="#4A8AA3",
-    text_primary="#FFFFFF",
-    text_secondary="#A0B8D0",
-    text_muted="#6B8BA4",
-    border="#2A3A5E",
-    success="#2E4A43",
-    warning="#D4A537",
-    error="#C0392B",
-)
+@dataclass(frozen=True)
+class Colors:
+    dark_charcoal: str = "#1A2523"
+    forest_green: str = "#2E4A43"
+    deep_teal: str = "#155D7A"
+    steel_blue: str = "#5B9BB5"
+    icy_blue: str = "#CDE6F0"
+    bg_primary: str = "#1A1A2E"
+    bg_secondary: str = "#16213E"
+    bg_card: str = "#1F2A44"
+    accent: str = "#5B9BB5"
+    accent_hover: str = "#4A8AA3"
+    text_primary: str = "#FFFFFF"
+    text_secondary: str = "#A0B8D0"
+    text_muted: str = "#6B8BA4"
+    border: str = "#2A3A5E"
+    success: str = "#2E4A43"
+    warning: str = "#D4A537"
+    error: str = "#C0392B"
+
+COLORS = Colors()
 
 # Initialize database
 def init_db():
