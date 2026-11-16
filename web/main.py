@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import sqlite3
+from collections import namedtuple
 from contextlib import asynccontextmanager
 
 app = FastAPI(title="Audible Clone", version="1.0.0")
@@ -40,28 +41,14 @@ EBOOKS_PATH = "/mnt/drive2/ebooks"
 TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
 DB_PATH = "/data/audible_web.db"
 
-# Color palette from pallet.jpg - make it hashable for Jinja2 cache
-class Colors:
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-    
-    def __hash__(self):
-        return hash(tuple(sorted(self.__dict__.items())))
-    
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-    
-    def __getitem__(self, key):
-        return getattr(self, key)
-    
-    def __contains__(self, key):
-        return hasattr(self, key)
-    
-    def get(self, key, default=None):
-        return getattr(self, key, default)
+# Color palette from pallet.jpg - use namedtuple for hashability
+Colors = namedtuple('Colors', [
+    'dark_charcoal', 'forest_green', 'deep_teal', 'steel_blue', 'icy_blue',
+    'bg_primary', 'bg_secondary', 'bg_card', 'accent', 'accent_hover',
+    'text_primary', 'text_secondary', 'text_muted', 'border', 'success',
+    'warning', 'error',
+])
 
-# Color palette from pallet.jpg - make it hashable for Jinja2 cache
 COLORS = Colors(
     dark_charcoal="#1A2523",
     forest_green="#2E4A43",
