@@ -63,6 +63,7 @@ services:
       - /mnt/drive2/covers:/mnt/drive2/covers
       - /mnt/drive2/ebooks:/mnt/drive2/ebooks
       - /mnt/drive2/tts_output:/mnt/drive2/tts_output
+      - /mnt/drive2/audiobooks:/mnt/drive2/audiobooks
     depends_on:
       audiobook-api:
         condition: service_healthy
