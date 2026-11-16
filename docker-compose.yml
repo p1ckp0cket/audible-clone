@@ -60,6 +60,9 @@ services:
       - API_URL=http://audiobook-api:8000
     volumes:
       - audiobook-web-data:/data
+      - /mnt/drive2/covers:/mnt/drive2/covers
+      - /mnt/drive2/ebooks:/mnt/drive2/ebooks
+      - /mnt/drive2/tts_output:/mnt/drive2/tts_output
     depends_on:
       audiobook-api:
         condition: service_healthy
