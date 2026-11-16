@@ -166,10 +166,16 @@ init_db()
 # Templates - disable cache to avoid issues with template caching
 templates_dir = Path(__file__).parent / "templates"
 templates_dir.mkdir(exist_ok=True)
-templates = Jinja2Templates(directory=str(templates_dir))
 
-# Disable template cache
-templates.env.cache = {}
+# Create Jinja2 environment with cache disabled
+from jinja2 import Environment, FileSystemLoader
+jinja_env = Environment(
+    loader=FileSystemLoader(str(templates_dir)),
+    auto_reload=False,
+    cache_size=0,  # Disable template cache
+)
+templates = Jinja2Templates(directory=str(templates_dir))
+templates.env = jinja_env
 
 # Static files
 app.mount("/covers", StaticFiles(directory=COVERS_PATH), name="covers")
