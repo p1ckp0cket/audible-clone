@@ -2,30 +2,28 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
     branches: [main]
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
+          cache: 'gradle'
 
-      - name: Set up Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: |
@@ -34,42 +32,25 @@ jobs:
             platforms;android-34
             ndk;26.1.10909125
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Grant execute permission for gradlew
+      - name: Make gradlew executable
         run: chmod +x ./android/gradlew
 
       - name: Build Debug APK
-        run: cd android && ./gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: ./android
+        run: ./gradlew assembleDebug
 
-      - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease --no-daemon --stacktrace
+      - name: Build Release APK (unsigned)
+        working-directory: ./android
+        run: ./gradlew assembleRelease
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/*.apk
-          retention-days: 30
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: android/app/build/outputs/apk/release/*.apk
-          retention-days: 30
-
-      - name: Print APK info
-        run: |
-          echo "Debug APK:"
-          ls -la android/app/build/outputs/apk/debug/
-          echo "Release APK:"
-          ls -la android/app/build/outputs/apk/release/
