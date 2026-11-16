@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import sqlite3
-from dataclasses import dataclass
 from contextlib import asynccontextmanager
 
 app = FastAPI(title="Audible Clone", version="1.0.0")
@@ -41,30 +40,24 @@ EBOOKS_PATH = "/mnt/drive2/ebooks"
 TTS_OUTPUT_PATH = "/mnt/drive2/tts_output"
 DB_PATH = "/data/audible_web.db"
 
-# Color palette from pallet.jpg - use frozen dataclass for hashability
-from dataclasses import dataclass
-
-@dataclass(frozen=True)
-class Colors:
-    dark_charcoal: str = "#1A2523"
-    forest_green: str = "#2E4A43"
-    deep_teal: str = "#155D7A"
-    steel_blue: str = "#5B9BB5"
-    icy_blue: str = "#CDE6F0"
-    bg_primary: str = "#1A1A2E"
-    bg_secondary: str = "#16213E"
-    bg_card: str = "#1F2A44"
-    accent: str = "#5B9BB5"
-    accent_hover: str = "#4A8AA3"
-    text_primary: str = "#FFFFFF"
-    text_secondary: str = "#A0B8D0"
-    text_muted: str = "#6B8BA4"
-    border: str = "#2A3A5E"
-    success: str = "#2E4A43"
-    warning: str = "#D4A537"
-    error: str = "#C0392B"
-
-COLORS = Colors()
+# Color palette from pallet.jpg - use individual constants for hashability
+DARK_CHARCOAL = "#1A2523"
+FOREST_GREEN = "#2E4A43"
+DEEP_TEAL = "#155D7A"
+STEEL_BLUE = "#5B9BB5"
+ICY_BLUE = "#CDE6F0"
+BG_PRIMARY = "#1A1A2E"
+BG_SECONDARY = "#16213E"
+BG_CARD = "#1F2A44"
+ACCENT = "#5B9BB5"
+ACCENT_HOVER = "#4A8AA3"
+TEXT_PRIMARY = "#FFFFFF"
+TEXT_SECONDARY = "#A0B8D0"
+TEXT_MUTED = "#6B8BA4"
+BORDER = "#2A3A5E"
+SUCCESS = "#2E4A43"
+WARNING = "#D4A537"
+ERROR = "#C0392B"
 
 # Initialize database
 def init_db():
@@ -191,38 +184,190 @@ async def fetch_from_api(endpoint: str):
         response.raise_for_status()
         return response.json()
 
-# Routes
+# Routes - pass colors as individual variables
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("home.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/library", response_class=HTMLResponse)
 async def library(request: Request):
-    return templates.TemplateResponse("library.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("library.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/discover", response_class=HTMLResponse)
 async def discover(request: Request):
-    return templates.TemplateResponse("discover.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("discover.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/profile", response_class=HTMLResponse)
 async def profile(request: Request):
-    return templates.TemplateResponse("profile.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("profile.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/player", response_class=HTMLResponse)
 async def player(request: Request):
-    return templates.TemplateResponse("player.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("player.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/search", response_class=HTMLResponse)
 async def search_page(request: Request):
-    return templates.TemplateResponse("search.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("search.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings(request: Request):
-    return templates.TemplateResponse("settings.html", {"request": request, "colors": COLORS})
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 @app.get("/book/{book_id}", response_class=HTMLResponse)
 async def book_detail(request: Request, book_id: int):
-    return templates.TemplateResponse("book_detail.html", {"request": request, "book_id": book_id, "colors": COLORS})
+    return templates.TemplateResponse("book_detail.html", {
+        "request": request, "book_id": book_id,
+        "DARK_CHARCOAL": "#1A2523",
+        "FOREST_GREEN": "#2E4A43",
+        "DEEP_TEAL": "#155D7A",
+        "STEEL_BLUE": "#5B9BB5",
+        "ICY_BLUE": "#CDE6F0",
+        "BG_PRIMARY": "#1A1A2E",
+        "BG_SECONDARY": "#16213E",
+        "BG_CARD": "#1F2A44",
+        "ACCENT": "#5B9BB5",
+        "ACCENT_HOVER": "#4A8AA3",
+        "TEXT_PRIMARY": "#FFFFFF",
+        "TEXT_SECONDARY": "#A0B8D0",
+        "TEXT_MUTED": "#6B8BA4",
+        "BORDER": "#2A3A5E",
+        "SUCCESS": "#2E4A43",
+        "WARNING": "#D4A537",
+        "ERROR": "#C0392B",
+    })
 
 # API Routes
 @app.get("/api/books")
