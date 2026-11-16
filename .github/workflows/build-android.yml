@@ -11,6 +11,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -26,9 +28,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          ndk-version: '26.1.10909125'
-          build-tools: 34.0.0
+          packages: |
+            build-tools;34.0.0
+            platform-tools
+            platforms;android-34
+            ndk;26.1.10909125
 
       - name: Cache Gradle
         uses: actions/cache@v4
