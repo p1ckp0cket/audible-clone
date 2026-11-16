@@ -174,8 +174,22 @@ jinja_env = Environment(
     auto_reload=False,
     cache_size=0,  # Disable template cache
 )
-templates = Jinja2Templates(directory=str(templates_dir))
-templates.env = jinja_env
+
+# Use the custom environment
+templates = Jinja2Templates(env=jinja_env)
+
+# Override the cache to completely disable it
+class NoCache(dict):
+    def __setitem__(self, key, value):
+        pass
+    def __getitem__(self, key):
+        raise KeyError(key)
+    def __contains__(self, key):
+        return False
+    def get(self, key, default=None):
+        return default
+
+templates.env.cache = NoCache()
 
 # Static files
 app.mount("/covers", StaticFiles(directory=COVERS_PATH), name="covers")
