@@ -113,7 +113,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS chapters (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             book_id INTEGER NOT NULL,
-            index INTEGER NOT NULL,
+            chapter_index INTEGER NOT NULL,
             title TEXT,
             start_offset_seconds INTEGER DEFAULT 0,
             end_offset_seconds INTEGER,
