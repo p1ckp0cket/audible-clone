@@ -714,7 +714,20 @@ async def get_books(
     sort: str = "added_at",
     order: str = "desc"
 ):
-    data = await fetch_from_api(f"/api/v1/library?page={page}&per_page={per_page}&search={search or ''}&author={author or ''}&genre={genre or ''}&source={source or ''}&status={status or ''}&sort={sort}&order={order}")
+    params = {"page": page, "per_page": per_page, "sort": sort, "order": order}
+    if search:
+        params["search"] = search
+    if author:
+        params["author"] = author
+    if genre:
+        params["genre"] = genre
+    if source:
+        params["source"] = source
+    if status:
+        params["status"] = status
+    
+    query_string = "&".join(f"{k}={v}" for k, v in params.items())
+    data = await fetch_from_api(f"/api/v1/library?{query_string}")
     return JSONResponse(content=data)
 
 @app.get("/api/books/{book_id}")
