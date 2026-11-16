@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Search Page -->
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Search Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 8px;">Search</h1>
+        <p style="color: var(--text-secondary);">Find books, authors, narrators, and more</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="card" style="padding: 24px; margin-bottom: 32px;">
+        <form id="searchForm" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div class="search-box" style="flex: 1; min-width: 300px;">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="form-input" placeholder="Search books, authors, narrators, genres..." name="q" id="searchInput" value="{{ query or '' }}" autofocus style="font-size: 1.1rem; padding: 16px 16px 16px 48px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 16px 32px; font-size: 1rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Search
+            </button>
+        </form>
+        
+        <!-- Filter Chips -->
+        <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Filters:</span>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" data-filter="all" onclick="setFilter(this, 'all')">All</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" data-filter="local" onclick="setFilter(this, 'local')">Local</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" data-filter="librivox" onclick="setFilter(this, 'librivox')">LibriVox</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" data-filter="audiobookbay" onclick="setFilter(this, 'audiobookbay')">AudioBookBay</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" data-filter="tts_generated" onclick="setFilter(this, 'tts_generated')">TTS Generated</button>
+        </div>
+    </div>
+
+    <!-- Search Suggestions (when no query) -->
+    <div id="suggestions" style="display: {% if not query %}block{% else %}none{% endif %};">
+        <h2 class="section-title" style="margin-bottom: 24px;">Popular Searches</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            {% for term in ['mystery', 'science fiction', 'fantasy', 'biography', 'history', 'self-help', 'business', 'romance', 'thriller', 'non-fiction'] %}
+            <button class="btn btn-secondary" onclick="searchTerm('{{ term }}')" style="padding: 8px 16px;">
+                {{ term }}
+            </button>
+            {% endfor %}
+        </div>
+        
+        <h2 class="section-title" style="margin-top: 32px; margin-bottom: 24px;">Trending Authors</div>
+        <div class="carousel" id="trendingAuthorsCarousel">
+            <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="resultsSection" style="display: {% if query %}block{% else %}none{% endif %};">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h2 class="section-title" style="margin: 0;">Results for "{{ query }}"</h2>
+                <p style="color: var(--text-secondary); margin-top: 4px;">{{ total }} results found</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <select class="form-select" id="sortSelect" style="width: auto; padding: 8px 12px;">
+                    <option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>Relevance</option>
+                    <option value="added_at" {% if sort == 'added_at' %}selected{% endif %}>Date Added</option>
+                    <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+                    <option value="author" {% if sort == 'author' %}selected{% endif %}>Author</option>
+                    <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Rating</option>
+                </select>
+                <select class="form-select" id="orderSelect" style="width: auto; padding: 8px 12px;">
+                    <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="book-grid" id="resultsGrid">
+            {% for book in books %}
+            <a href="/book/{{ book.id }}" class="grid-book">
+                <img class="book-cover" src="{{ book.cover_path ? '/covers/' + book.cover_path.split('/')[-1] : 'https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover' }}" 
+                     alt="{{ book.title }}" 
+                     onerror="this.src='https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover'">
+                <div class="book-info">
+                    <div class="book-title">{{ book.title }}</div>
+                    <div class="book-author">{{ book.author or 'Unknown Author' }}</div>
+                    <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 0.7rem; color: var(--text-muted);">
+                        <span>{{ format_duration(book.duration_seconds) }}</span>
+                        {% if book.narrator %}<span>🎙️ {{ book.narrator }}</span>{% endif %}
+                    </div>
+                    {% if book.progress_seconds and book.duration_seconds %}
+                    <div style="margin-top: 8px;">
+                        <div style="height: 3px; background: var(--border); border-radius: 1.5px; overflow: hidden;">
+                            <div style="width: {{ (book.progress_seconds / book.duration_seconds * 100) }}%; height: 100%; background: var(--accent);"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if not books %}
+        <div class="card" style="padding: 60px; text-align: center;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <h2 style="margin-bottom: 8px;">No results found</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Try different keywords or check your spelling.</p>
+            <a href="/discover" class="btn btn-primary">Browse All Books</a>
+        </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if pagination.total_pages > 1 %}
+        <nav style="display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap;">
+            {% if pagination.page > 1 %}
+            <a href="{{ url_for('search', q=query, page=pagination.page-1, per_page=per_page, sort=sort, order=order, filter=filter) }}" class="btn btn-secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Previous
+            </a>
+            {% endif %}
+            
+            {% for p in range(max(1, pagination.page-2), min(pagination.total_pages, pagination.page+2)+1) %}
+            <a href="{{ url_for('search', q=query, page=p, per_page=per_page, sort=sort, order=order, filter=filter) }}" 
+               class="btn {% if p == pagination.page %}btn-primary{% else %}btn-secondary{% endif %}" style="min-width: 44px;">
+                {{ p }}
+            </a>
+            {% endfor %}
+            
+            {% if pagination.page < pagination.total_pages %}
+            <a href="{{ url_for('search', q=query, page=pagination.page+1, per_page=per_page, sort=sort, order=order, filter=filter) }}" class="btn btn-secondary">
+                Next
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Loading overlay for infinite scroll -->
+<div id="loadingMore" style="display: none; text-align: center; padding: 20px;">
+    <div class="loading">Loading more results...</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentQuery = '{{ query }}';
+let currentFilter = '{{ filter or "all" }}';
+let currentSort = '{{ sort }}';
+let currentOrder = '{{ order }}';
+let currentPage = {{ pagination.page }};
+let isLoading = false;
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+function renderResults(books, append = false) {
+    const container = document.getElementById('resultsGrid');
+    if (!container) return;
+    
+    if (!books || books.length === 0) {
+        if (!append) {
+            container.innerHTML = '<div class="loading">No results found</div>';
+        }
+        return;
+    }
+    
+    const html = books.map(book => `
+        <a href="/book/${book.id}" class="grid-book">
+            <img class="book-cover" src="${book.cover_path ? '/covers/' + book.cover_path.split('/').pop() : 'https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover'}" 
+                 alt="${book.title}" 
+                 onerror="this.src='https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover'">
+            <div class="book-info">
+                <div class="book-title">${book.title}</div>
+                <div class="book-author">${book.author || 'Unknown Author'}</div>
+                <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 0.7rem; color: var(--text-muted);">
+                    <span>${formatDuration(book.duration_seconds)}</span>
+                    ${book.narrator ? `<span>🎙️ ${book.narrator}</span>` : ''}
+                </div>
+            </div>
+        </a>
+    `).join('');
+    
+    if (append) {
+        container.innerHTML += html;
+    } else {
+        container.innerHTML = html;
+    }
+}
+
+function setFilter(btn, filter) {
+    currentFilter = filter;
+    document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.remove('btn-primary'));
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-primary');
+    document.querySelectorAll('[data-filter]').forEach(b => {
+        if (b !== btn) {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-secondary');
+        }
+    });
+    search(1);
+}
+
+function search(page = 1) {
+    const query = document.getElementById('searchInput').value;
+    const sort = document.getElementById('sortSelect').value;
+    const order = document.getElementById('orderSelect').value;
+    
+    const params = new URLSearchParams();
+    if (currentQuery) params.append('q', currentQuery);
+    if (currentFilter !== 'all') params.append('filter', currentFilter);
+    params.append('page', 1);
+    params.append('sort', sort);
+    params.append('order', order);
+    
+    window.location.href = `/search?${params.toString()}`;
+}
+
+function searchTerm(term) {
+    document.getElementById('searchInput').value = term;
+    document.getElementById('searchForm').submit();
+}
+
+function loadMore() {
+    // Infinite scroll would go here
+}
+
+// Load trending authors
+async function loadTrendingAuthors() {
+    try {
+        const response = await fetch('/api/books?per_page=1000');
+        const data = await response.json();
+        
+        // Count books per author
+        const authorCounts = {};
+        data.books.forEach(book => {
+            if (book.author) {
+                authorCounts[book.author] = (authorCounts[book.author] || 0) + 1;
+            }
+        });
+        
+        // Sort by count
+        const sortedAuthors = Object.entries(authorCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .map(([author, count]) => ({ name: author, count }));
+        
+        const container = document.getElementById('trendingAuthorsCarousel');
+        if (!container) return;
+        
+        container.innerHTML = sortedAuthors.map(author => `
+            <a href="/search?q=${encodeURIComponent(author.name)}" class="carousel-item" style="text-align: center; padding: 20px; flex: 0 0 160px;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.5rem; font-weight: 700; color: white;">
+                    ${author.name.charAt(0)}
+                </div>
+                <div style="font-weight: 600; margin-bottom: 4px;">${author.name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">${author.count} books</div>
+            </a>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load trending authors:', error);
+    }
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load trending authors
+    loadTrendingAuthors();
+    
+    // Focus search input
+    document.getElementById('searchInput')?.focus();
+    
+    // Handle form submit
+    document.getElementById('searchForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        search(1);
+    });
+    
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput')?.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

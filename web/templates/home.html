@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="section">
+    <div style="background: linear-gradient(135deg, var(--deep-teal) 0%, var(--steel-blue) 100%); border-radius: 20px; padding: 48px; text-align: center; margin-bottom: 32px; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"%235B9BB5\" opacity=\"0.1\"/><circle cx=\"80\" cy=\"40\" r=\"1.5\" fill=\"%235B9BB5\" opacity=\"0.1\"/><circle cx=\"40\" cy=\"80\" r=\"1\" fill=\"%235B9BB5\" opacity=\"0.1\"/></svg>');"></div>
+        <div style="position: relative; z-index: 1;">
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; background: linear-gradient(135deg, var(--icy-blue), var(--steel-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                Welcome back
+            </h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px;">
+                Continue where you left off, or discover your next great listen.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="/library" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    My Library
+                </a>
+                <a href="/discover" class="btn btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Discover
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Continue Listening -->
+<section class="section" id="continueListening">
+    <div class="section-header">
+        <h2 class="section-title">Continue Listening</h2>
+    </div>
+    <div class="carousel-container">
+        <div class="carousel" id="continueCarousel">
+            <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Carousel -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Featured for You</h2>
+        <a href="/discover" class="section-link">View all →</a>
+    </div>
+    <div class="carousel-container">
+        <div class="carousel" id="featuredCarousel">
+            <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- New Releases -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">New Releases</h2>
+        <a href="/discover" class="section-link">View all →</a>
+    </div>
+    <div class="carousel" id="newReleasesCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- Genres -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Browse by Genre</h2>
+        <a href="/discover" class="section-link">View all →</a>
+    </div>
+    <div class="carousel" id="genresCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="section">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent);" id="statBooks">0</div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Books in Library</div>
+        </div>
+        <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent);" id="statHours">0</div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Hours of Listening</div>
+        </div>
+        <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent);" id="statSeries">0</div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Series</div>
+        </div>
+        <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent);" id="statAuthors">0</div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Authors</div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="section">
+    <h2 class="section-title" style="margin-bottom: 24px;">Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <a href="/discover" class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+            <div style="font-weight: 600;">Discover</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Find new books</div>
+        </a>
+        
+        <a href="/library" class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--forest-green), var(--deep-teal)); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </div>
+            <div style="font-weight: 600;">My Library</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Manage your books</div>
+        </a>
+        
+        <a href="/upload" class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--warning), #D4A537); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <div style="font-weight: 600;">Upload eBook</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Convert to audiobook</div>
+        </a>
+        
+        <a href="/settings" class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 1 4.6 9a1.65 1.65 0 0 0 .33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </div>
+            <div style="font-weight: 600;">Settings</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Customize your experience</div>
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load continue listening
+async function loadContinueListening() {
+    try {
+        const response = await fetch('/api/books?sort=last_played_at&order=desc&per_page=10');
+        const data = await response.json();
+        const books = data.books.filter(b => b.progress_seconds && b.progress_seconds > 0);
+        renderCarousel('continueCarousel', books, true);
+    } catch (error) {
+        console.error('Failed to load continue listening:', error);
+    }
+}
+
+// Load featured books
+async function loadFeatured() {
+    try {
+        const response = await fetch('/api/books?sort=rating&order=desc&per_page=10');
+        const data = await response.json();
+        renderCarousel('featuredCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load featured:', error);
+    }
+}
+
+// Load new releases
+async function loadNewReleases() {
+    try {
+        const response = await fetch('/api/books?sort=added_at&order=desc&per_page=10');
+        const data = await response.json();
+        renderCarousel('newReleasesCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load new releases:', error);
+    }
+}
+
+// Load genres
+async function loadGenres() {
+    try {
+        // For now, show some genre categories
+        const genres = [
+            { name: 'Mystery & Thriller', icon: '🔍', count: 42 },
+            { name: 'Science Fiction', icon: '🚀', count: 38 },
+            { name: 'Fantasy', icon: '🏰', count: 35 },
+            { name: 'Romance', icon: '💕', count: 28 },
+            { name: 'Non-Fiction', icon: '📚', count: 45 },
+            { name: 'Biography', icon: '👤', count: 22 },
+            { name: 'History', icon: '🏛️', count: 31 },
+            { name: 'Self-Help', icon: '💡', count: 19 },
+            { name: 'Business', icon: '💼', count: 24 },
+            { name: 'Science', icon: '🔬', count: 18 },
+            { name: 'Young Adult', icon: '✨', count: 16 },
+            { name: 'Kids', icon: '🧸', count: 12 },
+        ];
+        renderGenresCarousel(genres);
+    } catch (error) {
+        console.error('Failed to load genres:', error);
+    }
+}
+
+function renderCarousel(containerId, books, showProgress) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (!books || books.length === 0) {
+        container.innerHTML = '<div class="loading">No books found</div>';
+        return;
+    }
+    
+    container.innerHTML = books.map(book => `
+        <a href="/book/${book.id}" class="carousel-item">
+            <img class="book-cover" src="${book.cover_path ? '/covers/' + book.cover_path.split('/').pop() : 'https://via.placeholder.com/280x420/3a3a3a/ffffff?text=No+Cover'}" 
+                 alt="${book.title}" 
+                 onerror="this.src='https://via.placeholder.com/280x420/3a3a3a/ffffff?text=No+Cover'">
+            <div class="book-info">
+                <div class="book-title">${book.title || 'Unknown'}</div>
+                <div class="book-author">${book.author || 'Unknown Author'}</div>
+                <div class="book-meta">
+                    <span>${formatDuration(book.duration_seconds)}</span>
+                    ${book.narrator ? `<span>🎙️ ${book.narrator}</span>` : ''}
+                </div>
+                ${showProgress && book.progress_seconds ? `
+                    <div style="margin-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
+                            <span>${Math.round((book.progress_seconds / book.duration_seconds) * 100)}% complete</span>
+                            <span>${formatDuration(book.progress_seconds)} / ${formatDuration(book.duration_seconds)}</span>
+                        </div>
+                        <div style="height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                            <div style="width: ${(book.progress_seconds / book.duration_seconds) * 100}%; height: 100%; background: var(--accent); border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </a>
+    `).join('');
+}
+
+function renderGenresCarousel(genres) {
+    const container = document.getElementById('genresCarousel');
+    if (!container) return;
+    
+    container.innerHTML = genres.map(genre => `
+        <a href="/discover?genre=${encodeURIComponent(genre.name)}" class="carousel-item" style="text-align: center; padding: 24px; flex: 0 0 140px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">${genre.icon}</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${genre.name}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${genre.count} books</div>
+        </a>
+    `).join('');
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+// Load stats
+async function loadStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        document.getElementById('statBooks').textContent = data.total_books || 0;
+        document.getElementById('statHours').textContent = Math.floor((data.total_duration_seconds || 0) / 3600);
+        
+        // Count unique authors and series
+        const booksResponse = await fetch('/api/books?per_page=1000');
+        const booksData = await booksResponse.json();
+        const authors = new Set(booksData.books.map(b => b.author).filter(Boolean));
+        const series = new Set(booksData.books.map(b => b.series).filter(Boolean));
+        
+        document.getElementById('statAuthors').textContent = authors.size;
+        document.getElementById('statSeries').textContent = series.size;
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadContinueListening();
+    loadFeatured();
+    loadNewReleases();
+    loadGenres();
+    loadStats();
+});
+</script>
+{% endblock %}

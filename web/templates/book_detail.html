@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if book %}
+<!-- Book Detail Header -->
+<div style="display: flex; gap: 32px; margin-bottom: 32px; flex-wrap: wrap;">
+    <img src="{{ book.cover_path ? '/covers/' + book.cover_path.split('/')[-1] : 'https://via.placeholder.com/300x450/3a3a3a/ffffff?text=No+Cover' }}" 
+         alt="{{ book.title }}" 
+         onerror="this.src='https://via.placeholder.com/300x450/3a3a3a/ffffff?text=No+Cover'"
+         style="width: 240px; height: 360px; object-fit: cover; border-radius: 16px; flex-shrink: 0; background: var(--bg-secondary);">
+    
+    <div style="flex: 1; min-width: 300px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); padding: 4px 10px; border-radius: 6px;">{{ book.source|title }}</span>
+            {% if book.completed %}
+            <span style="font-size: 0.75rem; color: var(--success); background: rgba(46,74,67,0.2); padding: 4px 10px; border-radius: 6px;">✓ Finished</span>
+            {% elif book.progress_seconds and book.progress_seconds > 0 %}
+            <span style="font-size: 0.75rem; color: var(--accent); background: rgba(91,155,181,0.2); padding: 4px 10px; border-radius: 6px;">{{ (book.progress_seconds / book.duration_seconds * 100)|round }}%</span>
+            {% endif %}
+            <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); padding: 4px 10px; border-radius: 6px;">{{ book.source|title }}</span>
+        </div>
+        
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.2;">{{ book.title }}</h1>
+        
+        <div style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 16px;">
+            by {{ book.author or 'Unknown Author' }}
+            {% if book.narrator %}<span style="margin-left: 8px;">•</span> Narrated by {{ book.narrator }}{% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">
+            <span>{{ format_duration(book.duration_seconds) }}</span>
+            <span>{{ book.file_format or 'MP3' }} • {{ book.bitrate or '?' }} kbps</span>
+            {% if book.genres %}<span>{{ book.genres.join(', ') }}</span>{% endif %}
+            {% if book.published_year %}<span>{{ book.published_year }}</span>{% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+            {% if book.file_path %}
+            <button class="btn btn-primary" onclick="playBook({{ book.id }})" style="padding: 16px 32px; font-size: 1.1rem;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Play
+            </button>
+            {% endif %}
+            <a href="/book/{{ book.id }}/chapters" class="btn btn-secondary" style="padding: 14px 24px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                Chapters ({{ book.chapters_count }})
+            </a>
+            <button class="btn btn-secondary" onclick="toggleWishlist({{ book.id }})">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                Wishlist
+            </button>
+            <button class="btn btn-secondary" onclick="shareBook({{ book.id }})">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                Share
+            </button>
+        </div>
+        
+        <!-- Metadata -->
+        <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary);">Details</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; font-size: 0.9rem;">
+                <div><span style="color: var(--text-muted);">Author:</span> {{ book.author or 'Unknown' }}</div>
+                <div><span style="color: var(--text-muted);">Narrator:</span> {{ book.narrator or 'Unknown' }}</div>
+                {% if book.series %}<div><span style="color: var(--text-muted);">Series:</span> {{ book.series }}{% if book.series_number %} #{{ book.series_number }}{% endif %}</div>{% endif %}
+                {% if book.publisher %}<div><span style="color: var(--text-muted);">Publisher:</span> {{ book.publisher }}</div>{% endif %}
+                {% if book.published_year %}<div><span style="color: var(--text-muted);">Published:</span> {{ book.published_year }}</div>{% endif %}
+                {% if book.language %}<div><span style="color: var(--text-muted);">Language:</span> {{ book.language }}</div>{% endif %}
+                <div><span style="color: var(--text-muted);">Length:</span> {{ format_duration(book.duration_seconds) }}</div>
+                <div><span style="color: var(--text-muted);">Format:</span> {{ book.file_format or 'MP3' }}</div>
+                <div><span style="color: var(--text-muted);">Bitrate:</span> {{ book.bitrate or '?' }} kbps</div>
+                <div><span style="color: var(--text-muted);">File Size:</span> {{ (book.file_size / 1024 / 1024 / 1024).toFixed(2) }} GB</div>
+                <div><span style="color: var(--text-muted);">Source:</span> {{ book.source|title }}</div>
+                {% if book.isbn %}<div><span style="color: var(--text-muted);">ISBN:</span> {{ book.isbn }}</div>{% endif %}
+                {% if book.asin %}<div><span style="color: var(--text-muted);">ASIN:</span> {{ book.asin }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Description -->
+{% if book.description %}
+<div class="card" style="margin-top: 24px; padding: 24px;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 16px;">Description</h3>
+    <div style="color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap;">{{ book.description }}</div>
+</div>
+{% endif %}
+
+<!-- Chapters -->
+<div class="section" style="margin-top: 32px;">
+    <div class="section-header">
+        <h2 class="section-title">Chapters ({{ book.chapters_count }})</h2>
+    </div>
+    <div class="card" style="overflow: hidden;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="text-align: left; padding: 16px; font-weight: 600; color: var(--text-secondary);">#</th>
+                        <th style="text-align: left; padding: 16px; font-weight: 600; color: var(--text-secondary);">Chapter</th>
+                        <th style="text-align: right; padding: 16px; font-weight: 600; color: var(--text-secondary);">Duration</th>
+                        <th style="text-align: center; padding: 16px; font-weight: 600; color: var(--text-secondary);">Progress</th>
+                        <th style="text-align: center; padding: 16px; width: 60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="chaptersTable">
+                    <tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">Loading chapters...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Highlights -->
+<div class="section" style="margin-top: 32px;">
+    <div class="section-header">
+        <h2 class="section-title">Highlights & Notes</h2>
+    </div>
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1rem; font-weight: 600;">Your Highlights</h3>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L9 22l-1.5-5.5L3 22l1.5-5.5z"></path>
+                </svg>
+                Add Highlight
+            </button>
+        </div>
+        <div id="highlightsList">
+            <div class="loading">Loading highlights...</div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="card" style="padding: 60px; text-align: center;">
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+    <h2 style="margin-bottom: 8px;">Book not found</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 24px;">The book you're looking for doesn't exist or has been removed.</p>
+    <a href="/library" class="btn btn-primary">Back to Library</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentBookId = {{ book_id }};
+let currentBook = null;
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+async function loadBook() {
+    try {
+        const response = await fetch(`/api/books/${currentBookId}`);
+        if (!response.ok) throw new Error('Book not found');
+        const book = await response.json();
+        window.currentBook = book;
+        
+        // Update page title
+        document.title = `${book.title} - Audible Clone`;
+        
+        // Update progress bar if exists
+        if (book.progress_seconds && book.duration_seconds) {
+            const percent = (book.progress_seconds / book.duration_seconds * 100).toFixed(1);
+            document.querySelector('.book-info .book-meta')?.insertAdjacentHTML('beforeend', `
+                <div style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
+                        <span>${(book.progress_seconds / book.duration_seconds * 100).toFixed(1)}% complete</span>
+                        <span>${formatDuration(book.progress_seconds)} / ${formatDuration(book.duration_seconds)}</span>
+                    </div>
+                    <div style="height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                        <div style="width: ${(book.progress_seconds / book.duration_seconds * 100)}%; height: 100%; background: var(--accent); border-radius: 2px;"></div>
+                    </div>
+                </div>
+            `);
+        }
+    } catch (error) {
+        console.error('Failed to load book:', error);
+    }
+}
+
+async function loadChapters() {
+    try {
+        const response = await fetch(`/api/books/${currentBookId}/chapters`);
+        const data = await response.json();
+        const chapters = data.chapters || [];
+        
+        const tbody = document.getElementById('chaptersTable');
+        if (!tbody) return;
+        
+        if (chapters.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">No chapters found</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = chapters.map((chapter, index) => `
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">{{ index + 1 }}</td>
+                <td style="padding: 16px;">
+                    <div style="font-weight: 500;">{{ chapter.title || 'Chapter ' + (index + 1) }}</div>
+                    {% if chapter.file_path %}
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ chapter.file_path.split('/').pop() }}</div>
+                    {% endif %}
+                </td>
+                <td style="padding: 16px; text-align: right; color: var(--text-secondary);">{{ formatDuration(chapter.duration_seconds) }}</td>
+                <td style="padding: 16px; text-align: center;">
+                    <div style="height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; max-width: 100px; margin: 0 auto;">
+                        <div style="width: 0%; height: 100%; background: var(--accent);"></div>
+                    </div>
+                </td>
+                <td style="padding: 16px; text-align: center;">
+                    <button class="btn btn-icon" onclick="playChapter('{{ chapter.file_path }}')" title="Play Chapter">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load chapters:', error);
+    }
+}
+
+async function loadHighlights() {
+    try {
+        const response = await fetch(`/api/highlights/${currentBookId}`);
+        const data = await response.json();
+        const highlights = data.highlights || [];
+        
+        const container = document.getElementById('highlightsList');
+        if (!container) return;
+        
+        if (highlights.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No highlights yet. Start reading and highlight your favorite passages!</div>';
+            return;
+        }
+        
+        container.innerHTML = highlights.map(h => `
+            <div style="border-bottom: 1px solid var(--border); padding: 20px 0;">
+                <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${h.color}; flex-shrink: 0; margin-top: 6px;"></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ h.location_type === 'percent' ? (h.location_value * 100).toFixed(1) + '%' : formatDuration(h.location_value) }} into book</div>
+                    </div>
+                    <div style="flex-shrink: 0;">
+                        <button class="btn btn-icon" onclick="deleteHighlight(${h.id})" title="Delete">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div style="color: var(--text-primary); line-height: 1.6; margin-bottom: 8px;">{{ h.text }}</div>
+                {% if h.note %}
+                <div style="margin-top: 8px; padding: 12px; background: var(--bg-card); border-radius: 8px; border-left: 3px solid {{ h.color }};">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">{{ h.note }}</div>
+                </div>
+                {% endif %}
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px;">
+                    Added {{ new Date(h.created_at).toLocaleDateString() }}
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load highlights:', error);
+    }
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+function playBook(bookId) {
+    // Navigate to player page
+    window.location.href = `/player?book=${bookId}`;
+}
+
+async function playChapter(filePath) {
+    if (!filePath) return;
+    // For now, navigate to player with chapter
+    window.location.href = `/player?chapter=${encodeURIComponent(filePath)}`;
+}
+
+async function toggleWishlist(bookId) {
+    // TODO: Implement wishlist toggle
+    alert('Wishlist feature coming soon!');
+}
+
+function shareBook(bookId) {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+
+async function deleteHighlight(highlightId) {
+    if (!confirm('Delete this highlight?')) return;
+    
+    try {
+        const response = await fetch(`/api/highlights/${highlightId}`, { method: 'DELETE' });
+        if (response.ok) {
+            loadHighlights();
+        }
+    } catch (error) {
+        console.error('Failed to delete highlight:', error);
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadBook();
+    loadChapters();
+    loadHighlights();
+});
+</script>
+{% endblock %}

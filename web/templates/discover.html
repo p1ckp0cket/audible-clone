@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Discover Header -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">Discover</h1>
+        <p style="color: var(--text-secondary); margin-top: 4px;">Find your next great listen</p>
+    </div>
+</div>
+
+<!-- Featured Carousel -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Featured</h2>
+    </div>
+    <div class="carousel-container">
+        <div class="carousel" id="featuredCarousel">
+            <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- New Releases -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">New Releases</h2>
+    </div>
+    <div class="carousel" id="newReleasesCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- Top Rated -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Top Rated</h2>
+    </div>
+    <div class="carousel" id="topRatedCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- Bestsellers -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Bestsellers</h2>
+    </div>
+    <div class="carousel" id="bestsellersCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- Genres -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Browse by Genre</h2>
+    </div>
+    <div class="carousel" id="genresCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+
+<!-- LibriVox Public Domain -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Public Domain (LibriVox)</h2>
+    </div>
+    <div class="card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px;">LibriVox - Free Public Domain Audiobooks</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Access thousands of free public domain audiobooks from LibriVox. All books are free and in the public domain.</p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <input type="text" class="form-input" placeholder="Search LibriVox (title, author)..." id="librivoxSearch" style="flex: 1; min-width: 200px;">
+                    <button class="btn btn-primary" onclick="searchLibrivox()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="carousel" id="librivoxCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Search LibriVox to discover free books...</div>
+    </div>
+</section>
+
+<!-- AudioBookBay Integration -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">AudioBookBay</h2>
+    </div>
+    <div class="card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--warning), #D4A537); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px;">AudioBookBay Search</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Search and download audiobooks from AudioBookBay directly to your library.</p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <input type="text" class="form-input" placeholder="Search AudioBookBay..." id="abbSearch" style="flex: 1; min-width: 200px;">
+                    <button class="btn btn-primary" onclick="searchABB()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="carousel" id="abbCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Search AudioBookBay to find books...</div>
+    </div>
+</section>
+
+<!-- Curated Collections -->
+<section class="section">
+    <h2 class="section-title">Curated Collections</h2>
+    <div class="carousel" id="collectionsCarousel">
+        <div class="loading" style="width: 100%; grid-column: 1/-1;">Loading...</div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load featured
+async function loadFeatured() {
+    try {
+        const response = await fetch('/api/books?sort=rating&order=desc&per_page=15');
+        const data = await response.json();
+        renderCarousel('featuredCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load featured:', error);
+    }
+}
+
+// Load new releases
+async function loadNewReleases() {
+    try {
+        const response = await fetch('/api/books?sort=added_at&order=desc&per_page=15');
+        const data = await response.json();
+        renderCarousel('newReleasesCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load new releases:', error);
+    }
+}
+
+// Load top rated
+async function loadTopRated() {
+    try {
+        const response = await fetch('/api/books?sort=rating&order=desc&per_page=15');
+        const data = await response.json();
+        renderCarousel('topRatedCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load top rated:', error);
+    }
+}
+
+// Load bestsellers
+async function loadBestsellers() {
+    try {
+        const response = await fetch('/api/books?sort=rating&order=desc&per_page=15');
+        const data = await response.json();
+        renderCarousel('bestsellersCarousel', data.books, false);
+    } catch (error) {
+        console.error('Failed to load bestsellers:', error);
+    }
+}
+
+// Load genres
+async function loadGenres() {
+    const genres = [
+        { name: 'Mystery & Thriller', icon: '🔍', count: 42 },
+        { name: 'Science Fiction', icon: '🚀', count: 38 },
+        { name: 'Fantasy', icon: '🏰', count: 35 },
+        { name: 'Romance', icon: '💕', count: 28 },
+        { name: 'Non-Fiction', icon: '📚', count: 45 },
+        { name: 'Biography', icon: '👤', count: 22 },
+        { name: 'History', icon: '🏛️', count: 31 },
+        { name: 'Self-Help', icon: '💡', count: 19 },
+        { name: 'Business', icon: '💼', count: 24 },
+        { name: 'Science', icon: '🔬', count: 18 },
+        { name: 'Young Adult', icon: '✨', count: 16 },
+        { name: 'Kids', icon: '🧸', count: 12 },
+        { name: 'Horror', icon: '👻', count: 14 },
+        { name: 'Memoir', icon: '📖', count: 20 },
+    ];
+    renderGenresCarousel(genres);
+}
+
+function renderCarousel(containerId, books, showProgress) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (!books || books.length === 0) {
+        container.innerHTML = '<div class="loading">No books found</div>';
+        return;
+    }
+    
+    container.innerHTML = books.map(book => `
+        <a href="/book/${book.id}" class="carousel-item">
+            <img class="book-cover" src="${book.cover_path ? '/covers/' + book.cover_path.split('/').pop() : 'https://via.placeholder.com/280x420/3a3a3a/ffffff?text=No+Cover'}" 
+                 alt="${book.title}" 
+                 onerror="this.src='https://via.placeholder.com/280x420/3a3a3a/ffffff?text=No+Cover'">
+            <div class="book-info">
+                <div class="book-title">${book.title || 'Unknown'}</div>
+                <div class="book-author">${book.author || 'Unknown Author'}</div>
+                <div class="book-meta">
+                    <span>${formatDuration(book.duration_seconds)}</span>
+                    ${book.narrator ? `<span>🎙️ ${book.narrator}</span>` : ''}
+                </div>
+            </div>
+        </a>
+    `).join('');
+}
+
+function renderGenresCarousel(genres) {
+    const container = document.getElementById('genresCarousel');
+    if (!container) return;
+    
+    container.innerHTML = genres.map(genre => `
+        <a href="/library?genre=${encodeURIComponent(genre.name)}" class="carousel-item" style="text-align: center; padding: 24px; flex: 0 0 140px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">${genre.icon}</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${genre.name}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${genre.count} books</div>
+        </a>
+    `).join('');
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+// LibriVox search
+async function searchLibrivox() {
+    const query = document.getElementById('librivoxSearch').value;
+    if (!query.trim()) return;
+    
+    const container = document.getElementById('librivoxCarousel');
+    container.innerHTML = '<div class="loading">Searching LibriVox...</div>';
+    
+    try {
+        const response = await fetch(`/api/librivox/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.books && data.books.length > 0) {
+            renderCarousel('librivoxCarousel', data.books.slice(0, 15), false);
+        } else {
+            document.getElementById('librivoxCarousel').innerHTML = '<div class="loading">No results found</div>';
+        }
+    } catch (error) {
+        console.error('LibriVox search failed:', error);
+        document.getElementById('librivoxCarousel').innerHTML = '<div class="loading">Error searching LibriVox</div>';
+    }
+}
+
+// AudioBookBay search
+async function searchABB() {
+    const query = document.getElementById('abbSearch').value;
+    if (!query.trim()) return;
+    
+    const container = document.getElementById('abbCarousel');
+    container.innerHTML = '<div class="loading">Searching AudioBookBay...</div>';
+    
+    try {
+        const response = await fetch(`/api/abb/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.books && data.books.length > 0) {
+            renderCarousel('abbCarousel', data.books.slice(0, 15), false);
+        } else {
+            document.getElementById('abbCarousel').innerHTML = '<div class="loading">No results found</div>';
+        }
+    } catch (error) {
+        console.error('ABB search failed:', error);
+        document.getElementById('abbCarousel').innerHTML = '<div class="loading">Error searching AudioBookBay</div>';
+    }
+}
+
+// Load collections
+async function loadCollections() {
+    // Mock collections for now
+    const collections = [
+        { name: 'Best of 2024', icon: '🏆', count: 50 },
+        { name: 'Award Winners', icon: '🏅', count: 35 },
+        { name: 'Celebrity Narrated', icon: '🎭', count: 28 },
+        { name: 'Full Cast Productions', icon: '🎭', count: 22 },
+        { name: 'Short Listens (Under 6h)', icon: '⚡', count: 45 },
+        { name: 'Epics (Over 30h)', icon: '📚', count: 18 },
+        { name: 'First in Series', icon: '1️⃣', count: 60 },
+        { name: 'Completed Series', icon: '✅', count: 38 },
+    ];
+    
+    const container = document.getElementById('collectionsCarousel');
+    if (container) {
+        container.innerHTML = collections.map(c => `
+            <a href="/library?collection=${encodeURIComponent(c.name)}" class="carousel-item" style="text-align: center; padding: 24px; flex: 0 0 160px;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">${c.icon}</div>
+                <div style="font-weight: 600; margin-bottom: 4px;">${c.name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">${c.count} books</div>
+            </a>
+        `).join('');
+    }
+}
+
+// Load all
+document.addEventListener('DOMContentLoaded', () => {
+    loadFeatured();
+    loadNewReleases();
+    loadTopRated();
+    loadBestsellers();
+    loadGenres();
+    loadCollections();
+});
+
+// Search handlers
+document.getElementById('librivoxSearch')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchLibrivox();
+});
+
+document.getElementById('abbSearch')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchABB();
+});
+
+// Auto-load LibriVox featured on load
+document.addEventListener('DOMContentLoaded', () => {
+    // Load some popular LibriVox books
+    fetch('/api/librivox/search?q=&limit=15')
+        .then(r => r.json())
+        .then(data => {
+            if (data.books) {
+                renderCarousel('librivoxCarousel', data.books.slice(0, 15), false);
+            }
+        })
+        .catch(console.error);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,591 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <div id="playerPage" style="display: flex; flex-direction: column; height: 100vh;">
+        <!-- Book Info Header -->
+        <div id="bookInfo" style="text-align: center; padding: 40px 20px; flex-shrink: 0;">
+            <img id="playerCover" src="https://via.placeholder.com/300x450/3a3a3a/ffffff?text=No+Cover" 
+                 alt="" style="width: 240px; height: 360px; object-fit: cover; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); margin-bottom: 24px; background: var(--bg-secondary);">
+            <h1 id="bookTitle" style="font-size: 2rem; font-weight: 800; margin-bottom: 8px; max-width: 500px; margin-left: auto; margin-right: auto;">Select a book to play</h1>
+            <p id="bookAuthor" style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 24px;"></p>
+            
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to Library
+                </button>
+                <button class="btn btn-secondary" onclick="toggleChapterList()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    Chapters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Player -->
+        <div class="player-bar" style="position: relative; background: var(--bg-secondary); border-top: 1px solid var(--border); padding: 20px; flex-shrink: 0;">
+            <div class="player-track" style="max-width: 600px; margin: 0 auto;">
+                <div class="player-track-info" style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    <img class="player-cover" src="" alt="" id="miniCover" style="width: 64px; height: 96px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--bg-secondary);">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="player-title" id="miniTitle" style="font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No book playing</div>
+                        <div class="player-author" id="miniAuthor" style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                    </div>
+                </div>
+                
+                <div class="player-progress" style="display: flex; align-items: center; gap: 12px;">
+                    <span class="progress-time" id="miniCurrentTime" style="font-size: 0.75rem; color: var(--text-muted); min-width: 50px; text-align: right;">0:00</span>
+                    <div class="progress-bar" id="mainProgressBar" style="flex: 1; height: 6px; background: var(--border); border-radius: 3px; cursor: pointer; position: relative;">
+                        <div class="progress-fill" id="mainProgressFill" style="width: 0%; height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.1s linear;"></div>
+                    </div>
+                    <span class="progress-time" id="miniTotalTime" style="font-size: 0.75rem; color: var(--text-muted); min-width: 50px; text-align: left;">0:00</span>
+                </div>
+            </div>
+            
+            <div class="player-controls" style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 20px; flex-wrap: wrap;">
+                <button class="control-btn" id="speedBtn" title="Playback Speed">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                        <polyline points="4 15 17 15 13 15"></polyline>
+                    </svg>
+                    <span id="speedDisplay">1.0x</span>
+                </button>
+                
+                <button class="control-btn" id="sleepBtn" title="Sleep Timer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 6v6l4 2"></path>
+                    </svg>
+                </button>
+                
+                <button class="control-btn" id="speedDownBtn" title="Slower">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+                
+                <button class="control-btn" id="rewindBtn" title="Rewind 15s">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v16l13 -8 -13 -8"></path>
+                        <path d="M9 4v16"></path>
+                    </svg>
+                    <span style="font-size: 0.7rem;">15s</span>
+                </button>
+                
+                <button class="control-btn play-pause" id="mainPlayPauseBtn" style="width: 56px; height: 56px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" id="mainPlayIcon">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" id="pauseIcon" style="display:none;">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                </button>
+                
+                <button class="control-btn" id="forwardBtn" title="Forward 30s">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v16l-13 -8 13 -8"></path>
+                        <path d="M15 4v16"></path>
+                    </svg>
+                    <span style="font-size: 0.7rem;">30s</span>
+                </button>
+                
+                <button class="control-btn" id="speedUpBtn" title="Faster">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+                
+                <button class="control-btn" id="moreBtn" title="More Options">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Chapter List (Collapsible) -->
+            <div id="chapterList" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); max-height: 300px; overflow-y: auto;">
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary);">Chapters</h3>
+                <div id="chapterListContent" style="max-height: 250px; overflow-y: auto;">
+                    <div class="loading">Loading chapters...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Player state
+const playerState = {
+    currentBook: null,
+    isPlaying: false,
+    currentTime: 0,
+    duration: 0,
+    speed: 1.0,
+    chapters: [],
+    currentChapterIndex: 0
+};
+
+// DOM elements
+const playerCover = document.getElementById('playerCover');
+const playerTitle = document.getElementById('bookTitle');
+const playerAuthor = document.getElementById('bookAuthor');
+const miniCover = document.getElementById('miniCover');
+const miniTitle = document.getElementById('miniTitle');
+const miniAuthor = document.getElementById('miniAuthor');
+const mainProgressFill = document.getElementById('mainProgressFill');
+const mainProgressBar = document.getElementById('mainProgressBar');
+const miniCurrentTime = document.getElementById('miniCurrentTime');
+const miniTotalTime = document.getElementById('miniTotalTime');
+const playIcon = document.getElementById('playIcon');
+const pauseIcon = document.getElementById('pauseIcon');
+const mainPlayPauseBtn = document.getElementById('mainPlayPauseBtn');
+const speedDisplay = document.getElementById('speedDisplay');
+const speedDownBtn = document.getElementById('speedDownBtn');
+const speedUpBtn = document.getElementById('speedUpBtn');
+const rewindBtn = document.getElementById('rewindBtn');
+const forwardBtn = document.getElementById('forwardBtn');
+const mainPlayPauseBtnEl = document.getElementById('mainPlayPauseBtn');
+const speedBtn = document.getElementById('speedBtn');
+const sleepBtn = document.getElementById('sleepBtn');
+const speedDownBtnEl = document.getElementById('speedDownBtn');
+const speedUpBtnEl = document.getElementById('speedUpBtn');
+const rewindBtnEl = document.getElementById('rewindBtn');
+const forwardBtnEl = document.getElementById('forwardBtn');
+const speedDownBtnEl2 = document.getElementById('speedDownBtn');
+const forwardBtnEl2 = document.getElementById('forwardBtn');
+const chapterList = document.getElementById('chapterList');
+const chapterListContent = document.getElementById('chapterListContent');
+
+let audio = new Audio();
+let updateInterval = null;
+
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+// Get book ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const bookId = urlParams.get('book');
+
+async function loadBook() {
+    if (!bookId) {
+        document.getElementById('bookTitle').textContent = 'No book selected';
+        document.getElementById('bookAuthor').textContent = 'Select a book from your library to start listening';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/books/${bookId}`);
+        if (!response.ok) throw new Error('Book not found');
+        const book = await response.json();
+        window.currentBookData = book;
+        
+        document.title = `${book.title} - Audible Clone`;
+        document.getElementById('bookTitle').textContent = book.title;
+        document.getElementById('bookAuthor').textContent = `by ${book.author || 'Unknown'} • Narrated by ${book.narrator || 'Unknown'}`;
+        document.getElementById('miniTitle').textContent = book.title;
+        document.getElementById('miniAuthor').textContent = `by ${book.author || 'Unknown'}`;
+        
+        if (book.cover_path) {
+            const coverUrl = '/covers/' + book.cover_path.split('/').pop();
+            document.getElementById('playerCover').src = coverUrl;
+            document.getElementById('miniCover').src = coverUrl;
+        } else {
+            document.getElementById('playerCover').src = 'https://via.placeholder.com/300x450/3a3a3a/ffffff?text=No+Cover';
+            document.getElementById('miniCover').src = 'https://via.placeholder.com/64x96/3a3a3a/ffffff?text=No+Cover';
+        }
+        
+        // Load chapters
+        loadChapters();
+        
+        // Set up audio
+        if (book.file_path) {
+            // For now, we'll use the first audio file found
+            // In a real implementation, this would stream from the API
+            audio.src = `/api/books/${bookId}/stream`;
+            audio.crossOrigin = 'anonymous';
+            
+            audio.addEventListener('loadedmetadata', () => {
+                state.duration = audio.duration;
+                document.getElementById('miniTotalTime').textContent = formatTime(audio.duration);
+                updateProgress();
+            });
+            
+            audio.addEventListener('timeupdate', () => {
+                updateProgress();
+            });
+            
+            audio.addEventListener('ended', () => {
+                playNextChapter();
+            });
+            
+            audio.addEventListener('error', (e) => {
+                console.error('Audio error:', e);
+            });
+            
+            audio.playbackRate = state.speed;
+        }
+    } catch (error) {
+        console.error('Failed to load book:', error);
+        document.getElementById('bookTitle').textContent = 'Failed to load book';
+    }
+}
+
+async function loadChapters() {
+    try {
+        const response = await fetch(`/api/books/${bookId}/chapters`);
+        const data = await response.json();
+        const chapters = data.chapters || [];
+        
+        const container = document.getElementById('chapterListContent');
+        if (!container) return;
+        
+        if (!chapters || chapters.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No chapters found</div>';
+            return;
+        }
+        
+        container.innerHTML = chapters.map((chapter, index) => `
+            <button class="btn btn-secondary" onclick="playChapter(${index})" style="width: 100%; justify-content: space-between; padding: 12px 16px; text-align: left; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='var(--bg-card)'">
+                <div>
+                    <div style="font-weight: 500; font-size: 0.9rem;">${chapter.title || 'Chapter ' + (index + 1)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${formatTime(chapter.duration_seconds || 0)}</div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load chapters:', error);
+    }
+}
+
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+function updateProgress() {
+    if (!audio.duration) return;
+    
+    const current = audio.currentTime;
+    const duration = audio.duration;
+    const percent = (current / duration) * 100;
+    
+    document.getElementById('mainProgressFill').style.width = percent + '%';
+    document.getElementById('miniCurrentTime').textContent = formatTime(current);
+    document.getElementById('miniTotalTime').textContent = formatTime(duration);
+}
+
+function playPause() {
+    if (audio.paused) {
+        audio.play().then(() => {
+            state.isPlaying = true;
+            updatePlayPauseUI();
+            startProgressInterval();
+        }).catch(e => {
+            console.error('Play failed:', e);
+        });
+    } else {
+        audio.pause();
+        state.isPlaying = false;
+        updatePlayPauseUI();
+        stopProgressInterval();
+    }
+}
+
+function updatePlayPauseUI() {
+    if (state.isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+    } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+    }
+}
+
+function startProgressInterval() {
+    if (updateInterval) clearInterval(updateInterval);
+    updateInterval = setInterval(updateProgress, 500);
+}
+
+function stopProgressInterval() {
+    if (updateInterval) clearInterval(updateInterval);
+}
+
+function rewind15() {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+}
+
+function forward30() {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 30);
+}
+
+function changeSpeed(delta) {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(state.speed);
+    const newIndex = Math.max(0, Math.min(speeds.length - 1, currentIndex + delta));
+    state.speed = speeds[newIndex];
+    audio.playbackRate = state.speed;
+    document.getElementById('speedDisplay').textContent = state.speed.toFixed(2).replace(/\.?0+$/, '') + 'x';
+}
+
+function playChapter(index) {
+    // In a real implementation, this would load the specific chapter file
+    state.currentChapterIndex = index;
+    alert('Chapter playback would start here. In production, this would load the specific chapter audio file.');
+}
+
+function toggleChapterList() {
+    const list = document.getElementById('chapterList');
+    const isHidden = list.style.display === 'none';
+    list.style.display = isHidden ? 'block' : 'none';
+}
+
+function toggleWishlist(bookId) {
+    alert('Wishlist feature coming soon!');
+}
+
+function shareBook(bookId) {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+
+function goBack() {
+    window.history.back();
+}
+
+function goBack() {
+    window.history.back();
+}
+
+// Speed control
+const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+let currentSpeedIndex = speeds.indexOf(1.0);
+
+document.getElementById('speedDownBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = Math.max(0, speeds.indexOf(audio.playbackRate) - 1);
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('speedUpBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = Math.min(speeds.length - 1, speeds.indexOf(audio.playbackRate) + 1);
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('rewindBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+});
+
+document.getElementById('forwardBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 30);
+});
+
+document.getElementById('speedBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = (currentIndex + 1) % speeds.length;
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('sleepBtn')?.addEventListener('click', () => {
+    const minutes = prompt('Sleep timer (minutes):', '30');
+    if (minutes && !isNaN(minutes)) {
+        setTimeout(() => {
+            audio.pause();
+            state.isPlaying = false;
+            updatePlayPauseUI();
+            alert('Sleep timer ended. Playback paused.');
+        }, minutes * 60 * 1000);
+        alert(`Sleep timer set for ${minutes} minutes`);
+    }
+});
+
+document.getElementById('speedBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = (currentIndex + 1) % speeds.length;
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('mainPlayPauseBtn')?.addEventListener('click', () => {
+    if (audio.paused) {
+        audio.play().then(() => {
+            state.isPlaying = true;
+            document.getElementById('playIcon').style.display = 'none';
+            document.getElementById('pauseIcon').style.display = 'block';
+        }).catch(e => console.error('Play failed:', e));
+    } else {
+        audio.pause();
+        state.isPlaying = false;
+        document.getElementById('playIcon').style.display = 'block';
+        document.getElementById('pauseIcon').style.display = 'none';
+    }
+});
+
+document.getElementById('rewindBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+});
+
+document.getElementById('forwardBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 30);
+});
+
+document.getElementById('mainProgressBar')?.addEventListener('click', (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+});
+
+document.getElementById('speedDownBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = Math.max(0, speeds.indexOf(audio.playbackRate) - 1);
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('speedUpBtn')?.addEventListener('click', () => {
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
+    const currentIndex = speeds.indexOf(audio.playbackRate);
+    const newIndex = Math.min(speeds.length - 1, speeds.indexOf(audio.playbackRate) + 1);
+    audio.playbackRate = speeds[newIndex];
+    document.getElementById('speedDisplay').textContent = audio.playbackRate.toFixed(2).replace(/\.?0+$/, '') + 'x';
+});
+
+document.getElementById('rewindBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+});
+
+document.getElementById('forwardBtn')?.addEventListener('click', () => {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 30);
+});
+
+document.getElementById('mainPlayPauseBtn')?.addEventListener('click', () => {
+    if (audio.paused) {
+        audio.play().then(() => {
+            state.isPlaying = true;
+            document.getElementById('playIcon').style.display = 'none';
+            document.getElementById('pauseIcon').style.display = 'block';
+        }).catch(e => console.error('Play failed:', e));
+    } else {
+        audio.pause();
+        state.isPlaying = false;
+        document.getElementById('playIcon').style.display = 'block';
+        document.getElementById('pauseIcon').style.display = 'none';
+    }
+});
+
+document.getElementById('mainProgressBar')?.addEventListener('click', (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadBook();
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        switch(e.key) {
+            case ' ':
+                e.preventDefault();
+                playPause();
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                audio.currentTime = Math.max(0, audio.currentTime - 15);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                audio.currentTime = Math.min(audio.duration, audio.currentTime + 30);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                audio.volume = Math.min(1, audio.volume + 0.1);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                audio.volume = Math.max(0, audio.volume - 0.1);
+                break;
+            case 'm':
+                audio.muted = !audio.muted;
+                break;
+        }
+    });
+    
+    // Update progress periodically
+    setInterval(() => {
+        if (!audio.paused && audio.duration) {
+            document.getElementById('mainProgressFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+            document.getElementById('miniCurrentTime').textContent = formatTime(audio.currentTime);
+        }
+    }, 500);
+});
+</script>
+{% endblock %}

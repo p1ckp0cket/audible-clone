@@ -15,8 +15,8 @@ WORKDIR /app
 # Copy application
 COPY main.py .
 
-# Create templates directory
-RUN mkdir -p templates
+# Copy templates
+COPY templates/ templates/
 
 # Expose port
 EXPOSE 3000

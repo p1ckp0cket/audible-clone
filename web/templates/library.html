@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Library Header -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">My Library</h1>
+        <p style="color: var(--text-secondary); margin-top: 4px;">{{ total_books }} books</p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <a href="/upload" class="btn btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload eBook
+        </a>
+        <button class="btn btn-secondary" onclick="toggleView()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="viewIcon">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span id="viewLabel">Grid</span>
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <form id="filterForm" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+            <label class="form-label">Search</label>
+            <div class="search-box" style="width: 100%;">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="form-input" placeholder="Search titles, authors, narrators..." name="search" id="searchInput" value="{{ search or '' }}">
+            </div>
+        </div>
+        
+        <div class="form-group" style="min-width: 150px; margin: 0;">
+            <label class="form-label">Author</label>
+            <input type="text" class="form-input" placeholder="Filter by author" name="author" id="authorFilter" value="{{ author or '' }}">
+        </div>
+        
+        <div class="form-group" style="min-width: 150px; margin: 0;">
+            <label class="form-label">Genre</label>
+            <select class="form-select" name="genre" id="genreFilter">
+                <option value="">All Genres</option>
+                <option value="Mystery & Thriller" {% if genre == 'Mystery & Thriller' %}selected{% endif %}>Mystery & Thriller</option>
+                <option value="Science Fiction" {% if genre == 'Science Fiction' %}selected{% endif %}>Science Fiction</option>
+                <option value="Fantasy" {% if genre == 'Fantasy' %}selected{% endif %}>Fantasy</option>
+                <option value="Romance" {% if genre == 'Romance' %}selected{% endif %}>Romance</option>
+                <option value="Non-Fiction" {% if genre == 'Non-Fiction' %}selected{% endif %}>Non-Fiction</option>
+                <option value="Biography" {% if genre == 'Biography' %}selected{% endif %}>Biography</option>
+                <option value="History" {% if genre == 'History' %}selected{% endif %}>History</option>
+                <option value="Self-Help" {% if genre == 'Self-Help' %}selected{% endif %}>Self-Help</option>
+                <option value="Business" {% if genre == 'Business' %}selected{% endif %}>Business</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="min-width: 150px; margin: 0;">
+            <label class="form-label">Source</label>
+            <select class="form-select" name="source" id="sourceFilter">
+                <option value="">All Sources</option>
+                <option value="local" {% if source == 'local' %}selected{% endif %}>Local</option>
+                <option value="librivox" {% if source == 'librivox' %}selected{% endif %}>LibriVox</option>
+                <option value="audiobookbay" {% if source == 'audiobookbay' %}selected{% endif %}>AudioBookBay</option>
+                <option value="tts_generated" {% if source == 'tts_generated' %}selected{% endif %}>TTS Generated</option>
+                <option value="uploaded" {% if source == 'uploaded' %}selected{% endif %}>Uploaded</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="min-width: 150px; margin: 0;">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="available" {% if status == 'available' %}selected{% endif %}>Available</option>
+                <option value="downloading" {% if status == 'downloading' %}selected{% endif %}>Downloading</option>
+                <option value="processing" {% if status == 'processing' %}selected{% endif %}>Processing</option>
+                <option value="error" {% if status == 'error' %}selected{% endif %}>Error</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="min-width: 150px; margin: 0;">
+            <label class="form-label">Sort By</label>
+            <select class="form-select" name="sort" id="sortSelect">
+                <option value="added_at" {% if sort == 'added_at' %}selected{% endif %}>Date Added</option>
+                <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+                <option value="author" {% if sort == 'author' %}selected{% endif %}>Author</option>
+                <option value="last_played_at" {% if sort == 'last_played_at' %}selected{% endif %}>Last Played</option>
+                <option value="duration_seconds" {% if sort == 'duration_seconds' %}selected{% endif %}>Duration</option>
+                <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Rating</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Order</label>
+            <select class="form-select" name="order" id="orderSelect" style="width: auto;">
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="height: fit-content;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Apply
+        </button>
+        
+        <a href="/library" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 1 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"></path>
+                <line x1="12" y1="9" x2="12" y2="15"></line>
+                <line x1="9" y1="12" x2="15" y2="12"></line>
+            </svg>
+            Clear
+        </a>
+    </form>
+</div>
+
+<!-- Library Stats Bar -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+        Showing <strong>{{ books|length }}</strong> of <strong>{{ pagination.total }}</strong> books
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <label style="font-size: 0.85rem; color: var(--text-secondary);">Per page:</label>
+        <select class="form-select" id="perPageSelect" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+            <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+        </select>
+    </div>
+</div>
+
+<!-- Books Container -->
+<div id="booksContainer">
+    {% if view_mode == 'grid' %}
+    <div class="book-grid" id="booksGrid">
+        {% for book in books %}
+        <a href="/book/{{ book.id }}" class="grid-book">
+            <img class="book-cover" src="{{ book.cover_path ? '/covers/' + book.cover_path.split('/')[-1] : 'https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover' }}" 
+                 alt="{{ book.title }}" 
+                 onerror="this.src='https://via.placeholder.com/180x270/3a3a3a/ffffff?text=No+Cover'">
+            <div class="book-info">
+                <div class="book-title">{{ book.title }}</div>
+                <div class="book-author">{{ book.author or 'Unknown Author' }}</div>
+                <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 0.7rem; color: var(--text-muted);">
+                    <span>{{ format_duration(book.duration_seconds) }}</span>
+                    {% if book.narrator %}<span>🎙️ {{ book.narrator }}</span>{% endif %}
+                </div>
+                {% if book.progress_seconds and book.duration_seconds %}
+                <div style="margin-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px;">
+                        <span>{{ (book.progress_seconds / book.duration_seconds * 100)|round }}% complete</span>
+                    </div>
+                    <div style="height: 3px; background: var(--border); border-radius: 1.5px; overflow: hidden;">
+                        <div style="width: {{ (book.progress_seconds / book.duration_seconds * 100) }}%; height: 100%; background: var(--accent);"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- List View -->
+    <div style="display: flex; flex-direction: column; gap: 12px;" id="booksList">
+        {% for book in books %}
+        <a href="/book/{{ book.id }}" class="card" style="display: flex; gap: 16px; padding: 16px; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <img src="{{ book.cover_path ? '/covers/' + book.cover_path.split('/')[-1] : 'https://via.placeholder.com/120x180/3a3a3a/ffffff?text=No+Cover' }}" 
+                 alt="{{ book.title }}" 
+                 onerror="this.src='https://via.placeholder.com/120x180/3a3a3a/ffffff?text=No+Cover'"
+                 style="width: 80px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: var(--bg-secondary);">
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px;">
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;">{{ book.title }}</h3>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ book.author or 'Unknown Author' }}</div>
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-muted);">
+                    <span>🎙️ {{ book.narrator or 'Unknown Narrator' }}</span>
+                    <span>{{ format_duration(book.duration_seconds) }}</span>
+                    <span>{{ book.genres[0] if book.genres else 'Uncategorized' }}</span>
+                    <span>{{ book.file_format or 'MP3' }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                    {% if book.progress_seconds and book.duration_seconds %}
+                    <div style="flex: 1; max-width: 200px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                            <span>{{ (book.progress_seconds / book.duration_seconds * 100)|round }}% complete</span>
+                        </div>
+                        <div style="height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                            <div style="width: {{ (book.progress_seconds / book.duration_seconds * 100) }}%; height: 100%; background: var(--accent);"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">{{ book.source|title }}</span>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); padding: 4px 8px; border-radius: 6px;">{{ book.source|title }}</span>
+                {% if book.completed %}
+                <span style="font-size: 0.75rem; color: var(--success); background: rgba(46,74,67,0.2); padding: 4px 8px; border-radius: 6px;">✓ Finished</span>
+                {% elif book.progress_seconds and book.progress_seconds > 0 %}
+                <span style="font-size: 0.75rem; color: var(--accent); background: rgba(91,155,181,0.2); padding: 4px 8px; border-radius: 6px;">{{ (book.progress_seconds / book.duration_seconds * 100)|round }}%</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if not books %}
+    <div class="card" style="padding: 60px; text-align: center;">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <h2 style="margin-bottom: 8px;">No books found</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Try adjusting your filters or add some books to your library.</p>
+        <a href="/discover" class="btn btn-primary">Browse Books</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if pagination.total_pages > 1 %}
+<nav style="display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap;">
+    {% if pagination.page > 1 %}
+    <a href="{{ url_for('library', page=pagination.page-1, per_page=per_page, search=search, author=author, genre=genre, source=source, status=status, sort=sort, order=order) }}" class="btn btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Previous
+    </a>
+    {% endif %}
+    
+    {% for p in range(max(1, pagination.page-2), min(pagination.total_pages, pagination.page+2)+1) %}
+    <a href="{{ url_for('library', page=p, per_page=per_page, search=search, author=author, genre=genre, source=source, status=status, sort=sort, order=order) }}" 
+       class="btn {% if p == pagination.page %}btn-primary{% else %}btn-secondary{% endif %}" style="min-width: 44px;">
+        {{ p }}
+    </a>
+    {% endfor %}
+    
+    {% if pagination.page < pagination.total_pages %}
+    <a href="{{ url_for('library', page=pagination.page+1, per_page=per_page, search=search, author=author, genre=genre, source=source, status=status, sort=sort, order=order) }}" class="btn btn-secondary">
+        Next
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    </a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentView = '{{ view_mode or "grid" }}';
+let debounceTimer = null;
+
+function toggleView() {
+    currentView = currentView === 'grid' ? 'list' : 'grid';
+    document.getElementById('booksGrid')?.style.display = currentView === 'grid' ? 'grid' : 'none';
+    document.getElementById('booksList')?.style.display = currentView === 'list' ? 'flex' : 'none';
+    document.getElementById('viewLabel').textContent = currentView === 'grid' ? 'List' : 'Grid';
+    
+    const icon = document.getElementById('viewIcon');
+    if (currentView === 'grid') {
+        icon.innerHTML = '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>';
+    } else {
+        icon.innerHTML = '<line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+    }
+    localStorage.setItem('libraryView', currentView);
+}
+
+// Debounced search
+let searchDebounce = null;
+document.getElementById('searchInput')?.addEventListener('input', (e) => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+        document.getElementById('filterForm').submit();
+    }, 500);
+});
+
+// Auto-submit filters
+['authorFilter', 'genreFilter', 'sourceFilter', 'statusFilter', 'sortSelect', 'orderSelect'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+        document.getElementById('filterForm').submit();
+    });
+});
+
+document.getElementById('perPageSelect')?.addEventListener('change', () => {
+    document.getElementById('filterForm').submit();
+});
+
+// Keyboard shortcut for search
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('searchInput')?.focus();
+    }
+});
+
+// Restore view mode
+document.addEventListener('DOMContentLoaded', () => {
+    const savedView = localStorage.getItem('libraryView') || 'grid';
+    if (savedView !== currentView) {
+        toggleView();
+    }
+});
+</script>
+{% endblock %}

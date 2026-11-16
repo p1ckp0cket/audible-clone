@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Upload Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 8px;">Upload eBook</h1>
+        <p style="color: var(--text-secondary);">Convert your eBooks to audiobooks with high-quality TTS</p>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="card" style="padding: 32px; margin-bottom: 32px;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 24px;">Upload eBook File</h3>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">Select eBook File</label>
+                <div class="upload-zone" id="uploadZone" style="border: 2px dashed var(--border); border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--accent)'; this.style.background='var(--bg-secondary)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background=''">
+                    <input type="file" id="ebookFile" name="file" accept=".epub,.pdf,.mobi,.azw3,.txt,.html,.md" style="display: none;" accept=".epub,.pdf,.mobi,.azw3,.txt,.html,.md">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Drag & drop your eBook here</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">Supports: EPUB, PDF, MOBI, AZW3, TXT, HTML, MD</p>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('ebookFile').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Browse Files
+                    </button>
+                </div>
+                
+                <div id="fileInfo" style="display: none; margin-top: 16px; padding: 16px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 48px; height: 64px; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white;" id="fileIcon">{{ ext }}</div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; margin-bottom: 4px;" id="fileName"></div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="fileSize"></div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="clearFile()" style="padding: 8px 16px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">TTS Voice</label>
+                <select class="form-select" id="voiceSelect" name="voice">
+                    <option value="auto">Auto (Best available)</option>
+                    <optgroup label="Piper (CPU)">
+                        <option value="en_US-lessac-medium">Lessac (US) - Medium</option>
+                        <option value="en_US-amy-medium">Amy (US) - Medium</option>
+                        <option value="en_US-joe-medium">Joe (US) - Medium</option>
+                        <option value="en_GB-alan-medium">Alan (UK) - Medium</option>
+                        <option value="en_GB-northern_english_male-medium">Northern English Male (UK) - Medium</option>
+                        <option value="en_GB-southern_english_female-low">Southern English Female (UK) - Low</option>
+                    </optgroup>
+                    <optgroup label="Kokoro (CPU)">
+                        <option value="af">af (Female)</option>
+                        <option value="am">am (Male)</option>
+                        <option value="bf">bf (Female)</option>
+                        <option value="bm">bm (Male)</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Character Voices</label>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="checkbox" id="characterVoices" checked style="width: 20px; height: 20px; accent-color: var(--accent);">
+                    <label for="characterVoices" style="font-weight: 500; cursor: pointer;">Use different voices for different characters (when detected)</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Output Format</label>
+                <select class="form-select" id="outputFormat">
+                    <option value="mp3">MP3 (Compatible everywhere)</option>
+                    <option value="m4b">M4B (Audiobook format with chapters)</option>
+                    <option value="opus">OPUS (High quality, smaller size)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Quality / Bitrate</label>
+                <select class="form-select" id="bitrate">
+                    <option value="64">64 kbps (Smallest)</option>
+                    <option value="96">96 kbps</option>
+                    <option value="128" selected>128 kbps (Recommended)</option>
+                    <option value="192">192 kbps</option>
+                    <option value="256">256 kbps</option>
+                    <option value="320">320 kbps (Highest)</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; padding: 16px 32px; font-size: 1.1rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                    Convert to Audiobook
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()" style="padding: 16px 32px;">
+                    Clear
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Progress Section (Hidden initially) -->
+    <div id="progressSection" style="display: none; margin-top: 24px;">
+        <div class="card" style="padding: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 24px;">Conversion Progress</h3>
+            
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--deep-teal), var(--steel-blue)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white;" id="progressIcon">{{ ext }}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; margin-bottom: 4px;" id="progressFileName"></div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);" id="progressStatus">Initializing...</div>
+                </div>
+            </div>
+            
+            <div style="height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 16px;">
+                <div id="progressBar" style="width: 0%; height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s;"></div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">
+                <span id="progressPercent">0%</span>
+                <span id="progressTime">0s / 0s</span>
+            </div>
+            
+            <div id="progressDetails" style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace; background: var(--bg-card); padding: 16px; border-radius: 8px; max-height: 200px; overflow-y: auto;"></div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn btn-secondary" id="cancelBtn" onclick="cancelConversion()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversion History -->
+    <section class="section">
+        <h2 class="section-title">Conversion History</h2>
+        <div class="card" style="overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="text-align: left; padding: 16px; font-weight: 600; color: var(--text-secondary);">File</th>
+                        <th style="text-align: left; padding: 16px; font-weight: 600; color: var(--text-secondary);">Voice</th>
+                        <th style="text-align: right; padding: 16px; font-weight: 600; color: var(--text-secondary);">Progress</th>
+                        <th style="text-align: right; padding: 16px; font-weight: 600; color: var(--text-secondary);">Status</th>
+                        <th style="text-align: center; padding: 16px; width: 120px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable">
+                    <tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">No conversion history yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentFile = null;
+let progressInterval = null;
+
+function formatTime(seconds) {
+    if (!seconds) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatBytes(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// File upload handling
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('ebookFile');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const fileIcon = document.getElementById('fileIcon');
+const uploadForm = document.getElementById('uploadForm');
+const progressSection = document.getElementById('progressSection');
+const progressBar = document.getElementById('progressBar');
+const progressPercent = document.getElementById('progressPercent');
+const progressTime = document.getElementById('progressTime');
+const progressStatus = document.getElementById('progressStatus');
+const progressDetails = document.getElementById('progressDetails');
+const progressFileName = document.getElementById('progressFileName');
+const progressIcon = document.getElementById('progressIcon');
+const cancelBtn = document.getElementById('cancelBtn');
+
+const validExtensions = ['.epub', '.pdf', '.mobi', '.azw3', '.txt', '.html', '.md'];
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--accent)';
+    uploadZone.style.background = 'var(--bg-secondary)';
+});
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = 'var(--border)';
+    uploadZone.style.background = '';
+});
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--border)';
+    uploadZone.style.background = '';
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!validExtensions.includes(ext)) {
+        alert('Unsupported file format. Please use: ' + validExtensions.join(', '));
+        return;
+    }
+    
+    currentFile = file;
+    const extUpper = ext.slice(1).toUpperCase();
+    
+    document.getElementById('fileIcon').textContent = extUpper;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatBytes(file.size);
+    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('uploadZone').style.display = 'none';
+}
+
+function clearFile() {
+    currentFile = null;
+    fileInput.value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('uploadZone').style.display = 'block';
+}
+
+function clearForm() {
+    clearFile();
+    document.getElementById('uploadForm').reset();
+}
+
+async function uploadFile() {
+    if (!currentFile) {
+        alert('Please select a file first');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', currentFile);
+    formData.append('voice', document.getElementById('voiceSelect').value);
+    formData.append('character_voices', document.getElementById('characterVoices').checked);
+    formData.append('output_format', document.getElementById('outputFormat').value);
+    formData.append('bitrate', document.getElementById('bitrate').value);
+    
+    // Hide form, show progress
+    document.getElementById('uploadForm').style.display = 'none';
+    document.getElementById('progressSection').style.display = 'block';
+    
+    const fileExt = currentFile.name.split('.').pop().toUpperCase();
+    document.getElementById('progressIcon').textContent = fileExt;
+    document.getElementById('progressFileName').textContent = currentFile.name;
+    document.getElementById('progressStatus').textContent = 'Uploading...';
+    
+    try {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressPercent').textContent = percent + '%';
+                document.getElementById('progressTime').textContent = formatBytes(e.loaded) + ' / ' + formatBytes(e.total);
+                document.getElementById('progressStatus').textContent = 'Uploading...';
+            }
+        });
+        
+        xhr.addEventListener('load', async () => {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                document.getElementById('progressStatus').textContent = 'Upload complete. Starting conversion...';
+                document.getElementById('progressPercent').textContent = '0%';
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('progressTime').textContent = '0s / 0s';
+                document.getElementById('progressDetails').textContent = 'Conversion started...';
+                
+                // Start polling for progress
+                startProgressPolling(response.task_id);
+            } else {
+                document.getElementById('progressStatus').textContent = 'Upload failed: ' + xhr.responseText;
+                document.getElementById('progressDetails').textContent = 'Error: ' + xhr.responseText;
+            }
+        });
+        
+        xhr.addEventListener('error', () => {
+            document.getElementById('progressStatus').textContent = 'Upload failed';
+            document.getElementById('progressDetails').textContent = 'Network error occurred';
+        });
+        
+        xhr.open('POST', '/api/upload/ebook');
+        xhr.send(formData);
+        
+    } catch (error) {
+        console.error('Upload failed:', error);
+        document.getElementById('progressStatus').textContent = 'Upload failed';
+        document.getElementById('progressDetails').textContent = error.message;
+    }
+}
+
+function startProgressPolling(taskId) {
+    progressInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`/api/tts/tasks`);
+            const data = await response.json();
+            const task = data.tasks.find(t => t.ebook_id === currentFile.name.split('.')[0]);
+            
+            if (task) {
+                document.getElementById('progressPercent').textContent = task.progress + '%';
+                document.getElementById('progressBar').style.width = task.progress + '%';
+                document.getElementById('progressStatus').textContent = task.status.charAt(0).toUpperCase() + task.status.slice(1);
+                
+                if (task.output_path) {
+                    const elapsed = Math.floor((Date.now() - new Date(task.created_at).getTime()) / 1000);
+                    document.getElementById('progressTime').textContent = formatTime(elapsed) + ' / ~' + formatTime(elapsed * 100 / Math.max(1, task.progress));
+                }
+                
+                if (task.status === 'completed') {
+                    clearInterval(progressInterval);
+                    document.getElementById('progressStatus').textContent = 'Conversion completed!';
+                    document.getElementById('progressBar').style.width = '100%';
+                    document.getElementById('progressPercent').textContent = '100%';
+                    document.getElementById('cancelBtn').style.display = 'none';
+                    
+                    // Refresh history
+                    loadHistory();
+                    
+                    // Show success
+                    setTimeout(() => {
+                        alert('Conversion completed successfully!');
+                        resetForm();
+                    }, 1000);
+                } else if (task.status === 'error') {
+                    clearInterval(progressInterval);
+                    document.getElementById('progressStatus').textContent = 'Conversion failed';
+                    document.getElementById('progressDetails').textContent = task.error || 'Unknown error';
+                    document.getElementById('cancelBtn').style.display = 'none';
+                }
+                
+                if (task.output_path) {
+                    document.getElementById('progressDetails').textContent = 'Output: ' + task.output_path;
+                }
+            }
+        } catch (error) {
+            console.error('Progress polling error:', error);
+        }
+    }, 2000);
+}
+
+function cancelConversion() {
+    if (progressInterval) clearInterval(progressInterval);
+    document.getElementById('progressStatus').textContent = 'Cancelled';
+    document.getElementById('cancelBtn').style.display = 'none';
+    setTimeout(resetForm, 2000);
+}
+
+function resetForm() {
+    document.getElementById('uploadForm').style.display = 'block';
+    document.getElementById('progressSection').style.display = 'none';
+    clearFile();
+    document.getElementById('uploadForm').reset();
+    loadHistory();
+}
+
+function formatTime(seconds) {
+    if (!seconds) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatBytes(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+async function loadHistory() {
+    try {
+        const response = await fetch('/api/tts/tasks');
+        const data = await response.json();
+        const tbody = document.getElementById('historyTable');
+        
+        if (!data.tasks || data.tasks.length === 0) {
+            document.getElementById('historyTable').innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">No conversion history yet</td></tr>';
+            return;
+        }
+        
+        document.getElementById('historyTable').innerHTML = data.tasks.map(task => `
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 16px;">
+                    <div style="font-weight: 500;">${task.ebook_id}</td>
+                <td style="padding: 16px;">${task.voice || 'auto'}</td>
+                <td style="padding: 16px; text-align: right;">${task.progress}%</td>
+                <td style="padding: 16px; text-align: right;">
+                    <span style="padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; 
+                        background: ${task.status === 'completed' ? 'rgba(46,74,67,0.2)' : task.status === 'processing' ? 'rgba(91,155,181,0.2)' : task.status === 'error' ? 'rgba(192,57,43,0.2)' : 'rgba(91,155,181,0.2)'};
+                        color: ${task.status === 'completed' ? 'var(--success)' : task.status === 'processing' ? 'var(--accent)' : task.status === 'error' ? 'var(--error)' : 'var(--warning)'};">
+                        ${task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    </span>
+                </td>
+                <td style="padding: 16px; text-align: center;">
+                    ${task.status === 'completed' ? `
+                        <a href="/api/tts/download/${task.ebook_id}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Download
+                        ` : ''}
+                    ${task.status === 'error' ? `
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="retryTask('${task.ebook_id}')">
+                            Retry
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load history:', error);
+    }
+}
+
+function formatTime(seconds) {
+    if (!seconds) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatBytes(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function retryTask(ebookId) {
+    // Would need to re-upload the file
+    alert('Retry feature would re-upload the file. Please select the file again.');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+    
+    // Auto-hide file info when leaving page
+    window.addEventListener('beforeunload', () => {
+        if (progressInterval) clearInterval(progressInterval);
+    });
+});
+</script>
+{% endblock %}
