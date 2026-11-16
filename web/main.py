@@ -163,10 +163,13 @@ def init_db():
 
 init_db()
 
-# Templates
+# Templates - disable cache to avoid issues with template caching
 templates_dir = Path(__file__).parent / "templates"
 templates_dir.mkdir(exist_ok=True)
-templates = Jinja2Templates(directory=str(templates_dir))
+templates = Jinja2Templates(directory=str(templates_dir), auto_reload=True)
+
+# Disable template cache
+templates.env.cache = {}
 
 # Static files
 app.mount("/covers", StaticFiles(directory=COVERS_PATH), name="covers")
@@ -184,7 +187,7 @@ async def fetch_from_api(endpoint: str):
         response.raise_for_status()
         return response.json()
 
-# Routes - pass colors as individual variables
+# Routes
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("home.html", {
